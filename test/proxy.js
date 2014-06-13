@@ -10,7 +10,13 @@ describe('Zotero Proxy', function () {
 
   describe('when bound to context and target', function () {
     beforeEach(function () {
-      ctx = {}, target = sinon.spy(), p = proxy(ctx, target, 'prefix');
+      ctx = {};
+      target = sinon.spy();
+
+      p = proxy(ctx, target, 'prefix', {
+        append: ['append'],
+        postfix: ['postfix']
+      });
     });
 
     describe('when called', function () {
@@ -62,6 +68,42 @@ describe('Zotero Proxy', function () {
           target.args[0][1].should.equal(foo);
           target.args[0][2].should.equal(baz);
         });
+      });
+    });
+
+    describe('normal extensions', function () {
+      it('are created', function () {
+        p.append.should.be.a.Function;
+      });
+
+      it('delegate to the target', function () {
+        target.called.should.be.false;
+        p.append();
+        target.called.should.be.true;
+      });
+
+      it('append their name to the prefix', function () {
+        p.append();
+        p.append('foo');
+        target.args[0][0].should.eql('prefix/append');
+        target.args[1][0].should.eql('prefix/append');
+      });
+    });
+
+    describe('postfix extensions', function () {
+      it('are created', function () {
+        p.postfix.should.be.a.Function;
+      });
+
+      it('delegate to the target', function () {
+        target.called.should.be.false;
+        p.postfix('foo');
+        target.called.should.be.true;
+      });
+
+      it('append their name to the prefix after their argument', function () {
+        p.postfix('foo');
+        target.args[0][0].should.eql('prefix/foo/postfix');
       });
     });
   });
