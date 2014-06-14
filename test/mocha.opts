@@ -2,3 +2,4 @@
 --ui bdd
 --colors
 --reporter dot
+--check-leaks

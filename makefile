@@ -1,10 +1,27 @@
 SRC = lib/*.js
 include node_modules/make-lint/index.mk
 
+BIN = ./node_modules/.bin
+ISTANBUL = ./node_modules/.bin/istanbul
+
+TEST = test/*.js
+
 test:
-	@./node_modules/mocha/bin/mocha test/*.js
+	@${BIN}/mocha ${TEST}
+
+test-travis:
+	${BIN}/istanbul cover ${BIN}/_mocha --report-lcovonly -- ${TEST}
+
+spec:
+	@${BIN}/mocha --reporter spec ${TEST}
+
+coverage: clean
+	${BIN}/istanbul cover ${BIN}/_mocha -- ${TEST}
 
 watch:
 	@DEBUG=zotero:watch ./watch.js
 
-.PHONY: test watch
+clean:
+	rm -rf ./coverage/*
+
+.PHONY: clean test spec watch coverage

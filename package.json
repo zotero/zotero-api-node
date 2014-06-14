@@ -20,13 +20,14 @@
   },
   "homepage": "https://github.com/inukshuk/zotero-node",
   "devDependencies": {
-	  "mocha": "1.20.x",
-	  "should": "4.0.x",
-	  "sinon": "1.10.x",
-	  "watch": "0.10.x",
-	  "make-lint": "*"
+    "istanbul": "^0.2.11",
+    "make-lint": "*",
+    "mocha": "1.20.x",
+    "should": "4.0.x",
+    "sinon": "1.10.x",
+    "watch": "0.10.x"
   },
   "dependencies": {
-	  "debug": "*"
+    "debug": "*"
   }
 }
