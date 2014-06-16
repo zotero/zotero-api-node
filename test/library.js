@@ -13,6 +13,17 @@ describe('Zotero.Library', function () {
       var c = new Client();
       (new Library({ client: c })).client.should.equal(c);
     });
+
+    it('uses passed-in user/group id', function () {
+      var ulib = new Library({ user: 42 });
+      var glib = new Library({ group: 5 });
+
+      ulib.id.should.eql(42);
+      glib.id.should.eql(5);
+
+      ulib.type.should.eql('user');
+      glib.type.should.eql('group');
+    });
   });
 
   describe('#client', function () {
