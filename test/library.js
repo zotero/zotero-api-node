@@ -1,5 +1,6 @@
 var Library = require('../lib/library'),
-  Client = require('../lib/client');
+  Client = require('../lib/client'),
+  sinon = require('sinon');
 
 describe('Zotero.Library', function () {
   var library;
@@ -45,6 +46,47 @@ describe('Zotero.Library', function () {
     it('return groups/:id for group libraries', function () {
       library.group = 23;
       library.prefix.should.eql('groups/23');
+    });
+  });
+
+  describe('#items', function () {
+    beforeEach(function () { sinon.stub(library, 'get'); });
+    afterEach(function () { library.get.restore(); });
+
+    it('is a function', function () { library.items.should.be.a.Function; });
+
+    it('cannot be removed', function () {
+      library.items = null;
+      library.items.should.be.a.Function;
+    });
+
+    it('calls #get with items/:id', function () {
+      library.items('foo');
+      library.get.called.should.be.true;
+      library.get.args[0][0].should.eql('items/foo');
+    });
+
+    describe('#top', function () {
+      it('is a function', function () { library.items.top.should.be.a.Function; });
+
+      it('calls #get with items/top', function () {
+        library.items.top();
+        library.get.called.should.be.true;
+        library.get.args[0][0].should.eql('items/top');
+
+        library.items.top({ foo: 'bar' });
+        library.get.args[1][1].should.have.properties({ foo: 'bar' });
+      });
+    });
+
+    describe('#trash', function () {
+      it('is a function', function () { library.items.trash.should.be.a.Function; });
+
+      it('calls #get with items/top', function () {
+        library.items.trash();
+        library.get.called.should.be.true;
+        library.get.args[0][0].should.eql('items/trash');
+      });
     });
   });
 });
