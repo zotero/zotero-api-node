@@ -1,0 +1,8 @@
+{
+  "options": {
+    "outdir": "doc",
+    "tabtospace": "2",
+    "linkNatives": true,
+    "exclude": "test,example,node_modules"
+  }
+}

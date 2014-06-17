@@ -1,7 +1,7 @@
 var proxy = require('../lib/proxy'),
   sinon = require('sinon');
 
-describe('Zotero Proxy', function () {
+describe('zotero.proxy', function () {
   var ctx, target, p;
 
   it('returns a proxy function', function () {
@@ -71,41 +71,6 @@ describe('Zotero Proxy', function () {
       });
     });
 
-    describe('normal extensions', function () {
-      it('are created', function () {
-        p.append.should.be.a.Function;
-      });
-
-      it('delegate to the target', function () {
-        target.called.should.be.false;
-        p.append();
-        target.called.should.be.true;
-      });
-
-      it('append their name to the prefix', function () {
-        p.append();
-        p.append('foo');
-        target.args[0][0].should.eql('prefix/append');
-        target.args[1][0].should.eql('prefix/append');
-      });
-    });
-
-    describe('postfix extensions', function () {
-      it('are created', function () {
-        p.postfix.should.be.a.Function;
-      });
-
-      it('delegate to the target', function () {
-        target.called.should.be.false;
-        p.postfix('foo');
-        target.called.should.be.true;
-      });
-
-      it('append their name to the prefix after their argument', function () {
-        p.postfix('foo');
-        target.args[0][0].should.eql('prefix/foo/postfix');
-      });
-    });
   });
 });
 

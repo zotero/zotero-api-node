@@ -27,4 +27,4 @@ watch:
 clean:
 	rm -rf ./coverage/*
 
-.PHONY: clean test spec watch coverage
+.PHONY: clean test test-api test-travis spec watch coverage

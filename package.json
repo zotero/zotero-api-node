@@ -26,7 +26,8 @@
     "nock": "^0.34.1",
     "should": "4.0.x",
     "sinon": "1.10.x",
-    "watch": "0.10.x"
+    "watch": "0.10.x",
+    "yuidocjs": "^0.3.50"
   },
   "dependencies": {
     "debug": "*"
