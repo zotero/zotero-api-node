@@ -9,6 +9,9 @@ TEST = test/*.js
 test:
 	@${BIN}/mocha ${TEST}
 
+test-api:
+	@NOCK_OFF=true ${BIN}/mocha -t 5000 ${TEST}
+
 test-travis:
 	${BIN}/istanbul cover ${BIN}/_mocha --report-lcovonly -- ${TEST}
 

@@ -22,13 +22,13 @@ describe('Zotero.Client', function () {
 
       nock('https://api.zotero.org')
         .get(path)
-        .reply(200, 'foo');
+        .reply(200, '<?xml version="1.0"');
 
       client.get(path, function (error, res, data) {
         (!error).should.be.true;
 
         res.statusCode.should.eql(200);
-        data.toString().should.eql('foo');
+        data.toString().should.startWith('<?xml version="1.0"');
 
         done();
       });
