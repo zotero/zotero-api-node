@@ -102,6 +102,97 @@ describe('Zotero.Library', function () {
         library.get.args[1][1].should.have.properties({ foo: 'bar' });
       });
     });
+
+    describe('#tags', function () {
+      it('is a function', function () { library.items.tags.should.be.a.Function; });
+
+      it('calls #get with items/:id/tags', function () {
+        library.items.tags(42);
+        library.get.called.should.be.true;
+        library.get.args[0][0].should.eql('items/42/tags');
+
+        library.items.tags('foo', { foo: 'bar' });
+        library.get.args[1][0].should.eql('items/foo/tags');
+        library.get.args[1][1].should.have.properties({ foo: 'bar' });
+      });
+    });
+  });
+
+  describe('#collections', function () {
+    beforeEach(function () { sinon.stub(library, 'get'); });
+    afterEach(function () { library.get.restore(); });
+
+    it('is a function', function () { library.collections.should.be.a.Function; });
+
+    it('cannot be re-assigned', function () {
+      library.collections = null;
+      library.collections.should.be.a.Function;
+    });
+
+    it('calls #get with collections/:id', function () {
+      library.collections();
+      library.collections('foo');
+      library.get.called.should.be.true;
+      library.get.args[0][0].should.eql('collections');
+      library.get.args[1][0].should.eql('collections/foo');
+    });
+
+    describe('#collections', function () {
+      it('is a function', function () {
+        library.collections.collections.should.be.a.Function;
+        library.collections.nested.should.be.a.Function;
+      });
+
+      it('calls #get with collections/:id/collections', function () {
+        library.collections.collections('bar');
+        library.get.called.should.be.true;
+        library.get.args[0][0].should.eql('collections/bar/collections');
+      });
+
+      it('is also aviable as #nested', function () {
+        library.collections.nested('bar');
+        library.get.called.should.be.true;
+        library.get.args[0][0].should.eql('collections/bar/collections');
+      });
+    });
+
+    describe('#tags', function () {
+      it('is a function', function () { library.collections.tags.should.be.a.Function; });
+
+      it('calls #get with collections/:id/tags', function () {
+        library.collections.tags(42);
+        library.get.called.should.be.true;
+        library.get.args[0][0].should.eql('collections/42/tags');
+      });
+    });
+
+    describe('#items', function () {
+      it('is a function', function () { library.collections.items.should.be.a.Function; });
+
+      it('calls #get with collections/:id/items', function () {
+        library.collections.items(5);
+        library.get.called.should.be.true;
+        library.get.args[0][0].should.eql('collections/5/items');
+
+        library.collections.items('23', { foo: 'bar' });
+        library.get.args[1][0].should.eql('collections/23/items');
+        library.get.args[1][1].should.have.properties({ foo: 'bar' });
+      });
+
+      describe('#top', function () {
+        it('is a function', function () { library.collections.items.top.should.be.a.Function; });
+
+        it('calls #get with collections/:id/items/top', function () {
+          library.collections.items.top(5);
+          library.get.called.should.be.true;
+          library.get.args[0][0].should.eql('collections/5/items/top');
+
+          library.collections.items.top('23', { foo: 'bar' });
+          library.get.args[1][0].should.eql('collections/23/items/top');
+          library.get.args[1][1].should.have.properties({ foo: 'bar' });
+        });
+      });
+    });
   });
 });
 
