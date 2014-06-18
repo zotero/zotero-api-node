@@ -25,6 +25,11 @@ describe('Zotero.Library', function () {
       ulib.type.should.eql('user');
       glib.type.should.eql('group');
     });
+
+    it('uses passed-in headers to set client default headers', function () {
+      (new Library({ headers: { qux: 'quux' } })).client.options.headers.
+        should.have.property('qux', 'quux');
+    });
   });
 
   describe('#client', function () {
