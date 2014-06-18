@@ -194,5 +194,56 @@ describe('Zotero.Library', function () {
       });
     });
   });
+
+  describe('#tags', function () {
+    beforeEach(function () { sinon.stub(library, 'get'); });
+    afterEach(function () { library.get.restore(); });
+
+    it('is a function', function () { library.tags.should.be.a.Function; });
+
+    it('calls #get with tags/:tag', function () {
+      library.tags();
+      library.tags('foo');
+      library.get.called.should.be.true;
+      library.get.args[0][0].should.eql('tags');
+      library.get.args[1][0].should.eql('tags/foo');
+    });
+
+    it('url-encodes the tag', function () {
+      library.tags('foo bar/baz');
+      library.get.called.should.be.true;
+      library.get.args[0][0].should.eql('tags/foo%20bar%2Fbaz');
+    });
+  });
+
+  describe('#keys', function () {
+    beforeEach(function () { sinon.stub(library, 'get'); });
+    afterEach(function () { library.get.restore(); });
+
+    it('is a function', function () { library.keys.should.be.a.Function; });
+
+    it('calls #get with keys/:key', function () {
+      library.keys();
+      library.keys('foo');
+      library.get.called.should.be.true;
+      library.get.args[0][0].should.eql('keys');
+      library.get.args[1][0].should.eql('keys/foo');
+    });
+  });
+
+  describe('#searches', function () {
+    beforeEach(function () { sinon.stub(library, 'get'); });
+    afterEach(function () { library.get.restore(); });
+
+    it('is a function', function () { library.searches.should.be.a.Function; });
+
+    it('calls #get with searches/:key', function () {
+      library.searches();
+      library.searches('foo');
+      library.get.called.should.be.true;
+      library.get.args[0][0].should.eql('searches');
+      library.get.args[1][0].should.eql('searches/foo');
+    });
+  });
 });
 
