@@ -88,6 +88,20 @@ describe('Zotero.Library', function () {
         library.get.args[0][0].should.eql('items/trash');
       });
     });
+
+    describe('#children', function () {
+      it('is a function', function () { library.items.children.should.be.a.Function; });
+
+      it('calls #get with items/:id/children', function () {
+        library.items.children(42);
+        library.get.called.should.be.true;
+        library.get.args[0][0].should.eql('items/42/children');
+
+        library.items.children('foo', { foo: 'bar' });
+        library.get.args[1][0].should.eql('items/foo/children');
+        library.get.args[1][1].should.have.properties({ foo: 'bar' });
+      });
+    });
   });
 });
 

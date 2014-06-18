@@ -13,10 +13,7 @@ describe('zotero.proxy', function () {
       ctx = {};
       target = sinon.spy();
 
-      p = proxy(ctx, target, 'prefix', {
-        append: ['append'],
-        postfix: ['postfix']
-      });
+      p = proxy(ctx, target, 'prefix');
     });
 
     describe('when called', function () {
