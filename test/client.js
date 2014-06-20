@@ -24,7 +24,7 @@ describe('Zotero.Client', function () {
         .get(path)
         .reply(200, '<?xml version="1.0"');
 
-      client.get(path, function (error, res, data) {
+      client.get(path, function (error, data, res) {
         (!error).should.be.true;
 
         res.statusCode.should.eql(200);
