@@ -30,7 +30,7 @@
     "yuidocjs": "^0.3.50"
   },
   "dependencies": {
-    "assert-plus": "^0.1.5",
-    "debug": "*"
+    "debug": "*",
+    "mime-types": "^1.0.0"
   }
 }
