@@ -1,10 +1,11 @@
-SRC = lib/*.js
-include node_modules/make-lint/index.mk
-
 BIN = ./node_modules/.bin
 ISTANBUL = ./node_modules/.bin/istanbul
 
+SRC = lib/*.js
 TEST = test/*.js
+
+lint:
+	@${BIN}/eslint --reset -c lint.json ${SRC}
 
 test:
 	@${BIN}/mocha ${TEST}
@@ -27,4 +28,4 @@ watch:
 clean:
 	rm -rf ./coverage/*
 
-.PHONY: clean test test-api test-travis spec watch coverage
+.PHONY: lint clean test test-api test-travis spec watch coverage
