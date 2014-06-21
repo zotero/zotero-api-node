@@ -4,14 +4,14 @@ ISTANBUL = ./node_modules/.bin/istanbul
 SRC = lib/*.js
 TEST = test/*.js
 
+doc:
+	${BIN}/yuidoc .
+
 lint:
 	@${BIN}/eslint --reset -c lint.json ${SRC}
 
 test:
 	@${BIN}/mocha ${TEST}
-
-test-api:
-	@NOCK_OFF=true ${BIN}/mocha -t 5000 ${TEST}
 
 test-travis:
 	${BIN}/istanbul cover ${BIN}/_mocha --report-lcovonly -- ${TEST}
@@ -26,6 +26,7 @@ watch:
 	@DEBUG=zotero:watch ./watch.js
 
 clean:
-	rm -rf ./coverage/*
+	rm -rf ./coverage
+	rm -rf ./doc
 
-.PHONY: lint clean test test-api test-travis spec watch coverage
+.PHONY: lint doc clean test test-travis spec watch coverage
