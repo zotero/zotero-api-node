@@ -13,6 +13,9 @@ lint:
 test:
 	@${BIN}/mocha ${TEST}
 
+debug:
+	@${BIN}/mocha debug ${TEST}
+
 test-travis:
 	${BIN}/istanbul cover ${BIN}/_mocha --report-lcovonly -- ${TEST}
 
@@ -29,4 +32,4 @@ clean:
 	rm -rf ./coverage
 	rm -rf ./doc
 
-.PHONY: lint doc clean test test-travis spec watch coverage
+.PHONY: lint doc clean test debug test-travis spec watch coverage

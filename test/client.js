@@ -24,11 +24,11 @@ describe('Zotero.Client', function () {
         .get(path)
         .reply(200, '<?xml version="1.0"');
 
-      client.get(path, function (error, data, res) {
+      client.get(path, function (error, message) {
         (!error).should.be.true;
 
-        res.statusCode.should.eql(200);
-        data.toString().should.startWith('<?xml version="1.0"');
+        message.code.should.eql(200);
+        message.data.toString().should.startWith('<?xml version="1.0"');
 
         done();
       });
@@ -39,9 +39,9 @@ describe('Zotero.Client', function () {
 
       nock('https://api.zotero.org')
         .get(path)
-        .reply(404, 'Not found');
+        .reply(404, 'Not found', { 'Content-Type': 'text/plain' });
 
-      client.get(path, function (error, data, res) {
+      client.get(path, function (error, message) {
         error.code.should.eql(404);
         error.message.should.match(/not found/i);
 
@@ -56,15 +56,15 @@ describe('Zotero.Client', function () {
         .get(path + '?format=versions')
         .reply(200, { foo: 23 });
 
-      client.get(path, { format: 'versions' }, function (error, data, res) {
+      client.get(path, { format: 'versions' }, function (error, message) {
         (!error).should.be.true;
 
-        res.statusCode.should.eql(200);
-        res.headers['content-type'].should.match(/json/i);
+        message.code.should.eql(200);
+        message.type.should.eql('json');
 
-        data.should.be.an.Object;
-        data.should.not.be.empty;
-        data.foo.should.eql(23);
+        message.data.should.be.an.Object;
+        message.data.should.not.be.empty;
+        message.data.foo.should.eql(23);
 
         done();
       });
