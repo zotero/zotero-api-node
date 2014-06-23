@@ -42,7 +42,6 @@ describe('Zotero.Client', function () {
         .reply(404, 'Not found', { 'Content-Type': 'text/plain' });
 
       client.get(path, function (error, message) {
-        debugger
         error.code.should.eql(404);
         error.message.should.match(/not found/i);
 
