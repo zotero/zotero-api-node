@@ -149,6 +149,26 @@ describe('Zotero.Client', function () {
       });
     });
 
+    it('updates client state using response headers', function (done) {
+      var path = '/users/475425/collections/9KH9TNSJ/items';
+
+      nock('https://api.zotero.org')
+        .get(path)
+        .reply(200, { foo: 23 }, { 'Retry-After': 42, 'Backoff': 11 });
+
+      client.state.retry.should.eql(0);
+      client.state.backoff.should.eql(0);
+
+      client.get(path, function () {
+        client.state.retry.should.eql(42000);
+        client.state.backoff.should.eql(11000);
+        done();
+      });
+
+      client.state.retry.should.eql(0);
+      client.state.backoff.should.eql(0);
+    });
+
   });
 
   describe('#state', function () {
