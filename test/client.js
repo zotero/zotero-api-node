@@ -1,4 +1,5 @@
 var Client = require('../lib/client'),
+  Message = require('../lib/message'),
   nock = require('nock'),
   sinon = require('sinon');
 
@@ -17,20 +18,47 @@ describe('Zotero.Client', function () {
   });
 
   describe('#get', function () {
-    it('sends an HTTPS request to the API server', function (done) {
+
+    describe('given a valid path', function () {
       var path = '/users/475425/collections/9KH9TNSJ/items';
+      var response = '<?xml version="1.0"';
 
-      nock('https://api.zotero.org')
-        .get(path)
-        .reply(200, '<?xml version="1.0"');
+      beforeEach(function() {
+        nock('https://api.zotero.org')
+          .get(path)
+          .reply(200, response);
+      });
 
-      client.get(path, function (error, message) {
-        (!error).should.be.true;
+      it('sends an HTTPS request to the API server', function (done) {
+        client.get(path, function (error, message) {
+          (!error).should.be.true;
 
-        message.code.should.eql(200);
-        message.data.toString().should.startWith('<?xml version="1.0"');
+          message.code.should.eql(200);
+          message.data.toString().should.startWith(response);
 
-        done();
+          done();
+        });
+      });
+
+      it('returns the (unsent) message object', function () {
+        var message = client.get(path);
+
+        message.should.be.instanceof(Message);
+        message.should.have.property('req');
+        message.should.have.property('res', undefined);
+      });
+
+      it('adds the message to the message queue and flushes it', function (done) {
+        client.messages.should.be.empty;
+
+        var message = client.get(path, function (_, m) {
+          message.should.equal(m);
+          client.messages.should.be.empty;
+
+          done();
+        });
+
+        client.messages.should.not.be.empty;
       });
     });
 
@@ -69,6 +97,7 @@ describe('Zotero.Client', function () {
         done();
       });
     });
+
   });
 
   describe('#state', function () {
