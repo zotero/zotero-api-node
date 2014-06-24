@@ -59,6 +59,57 @@ describe('Zotero.Client', function () {
         });
 
         client.messages.should.not.be.empty;
+        (!client.state.delayed).should.be.true;
+      });
+
+      it('message queue is flushed on the next tick', function (done) {
+        client.messages.should.be.empty;
+
+        client.get(path);
+
+        client.messages.should.not.be.empty;
+
+        process.nextTick(function () {
+          client.messages.should.be.empty;
+          done();
+        });
+      });
+
+      it('calls back exactly once', function (done) {
+        client.get(path, done);
+      });
+
+      describe('when the client is rate-limited', function () {
+
+        beforeEach(function () {
+          client.state.retry = 2000;
+          client.state.timestamp = Date.now();
+        });
+
+        it('sets #state.delayed', function (done) {
+          client.get(path);
+          client.state.limited.should.be.greaterThan(0);
+          (!client.state.delayed).should.be.true;
+
+          process.nextTick(function () {
+            (!client.state.delayed).should.be.false;
+            clearTimeout(client.state.delayed);
+
+            client.messages.should.not.be.empty;
+
+            done();
+          });
+        });
+
+        it('calls back exactly once', function (done) {
+          client.state.retry = 15; // do not delay the test for too long!
+          client.get(path, done);
+
+          // the following assertion is just to make sure that
+          // the queue is not flushed normally.
+          client.state.limited.should.be.greaterThan(0);
+        });
+
       });
     });
 
@@ -104,6 +155,14 @@ describe('Zotero.Client', function () {
     it('is not limited by default', function () {
       client.state.limited.should.eql(0);
       (!client.state.reason).should.be.true;
+    });
+
+    it('is limited if retry + now is in the future', function () {
+      client.state.retry = 10000;
+      client.state.timestamp = Date.now();
+      client.state.limited.should.be.greaterThan(0);
+      client.state.timestamp -= 10000;
+      client.state.limited.should.eql(0);
     });
   });
 });
