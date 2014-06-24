@@ -19,9 +19,11 @@ describe('Zotero.Library', function () {
       var ulib = new Library({ user: 42 });
       var glib = new Library({ group: 5 });
 
+      (library.id === undefined).should.be.true;
       ulib.id.should.eql(42);
       glib.id.should.eql(5);
 
+      (library.type === undefined).should.be.true;
       ulib.type.should.eql('user');
       glib.type.should.eql('group');
     });
@@ -51,6 +53,19 @@ describe('Zotero.Library', function () {
     it('return groups/:id for group libraries', function () {
       library.group = 23;
       library.prefix.should.eql('groups/23');
+    });
+  });
+
+  describe('#path', function () {
+    it('returns / if the library has no id', function () {
+      library.path().should.eql('/');
+      library.path('foo').should.eql('/foo');
+    });
+
+    it('returns /:prefix if the library has an id', function () {
+      library.user = 42;
+      library.path().should.eql('/users/42');
+      library.path('foo').should.eql('/users/42/foo');
     });
   });
 
