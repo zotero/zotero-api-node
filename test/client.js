@@ -38,6 +38,14 @@ describe('Zotero.Client', function () {
     });
   });
 
+  describe('#version', function () {
+    it('corresponds to the Zotero-API-Version default header', function () {
+      client.version.should.eql('3');
+      client.version = 2;
+      client.version.should.eql('2');
+      client.options.headers.should.have.property('Zotero-API-Version', '2');
+    });
+  });
   describe('#get', function () {
 
     describe('given a valid path', function () {
