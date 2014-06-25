@@ -45,7 +45,7 @@ describe('Zotero.Client', function () {
 
         message.should.be.instanceof(Message);
         message.should.have.property('req');
-        message.should.have.property('res', undefined);
+        message.should.not.have.property('res');
       });
 
       it('adds the message to the message queue and flushes it', function (done) {
