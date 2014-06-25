@@ -17,6 +17,27 @@ describe('Zotero.Client', function () {
     });
   });
 
+  describe('#persist', function () {
+    it('is true if the `Connection: keep-alive` default header is set', function () {
+      client.persist.should.be.false;
+      client.options.headers.should.not.have.property('Connection');
+      
+      client.persist = true;
+
+      client.persist.should.be.true;
+      client.options.headers.should.have.property('Connection', 'keep-alive');
+
+      client.options.headers.Connection = 'foo';
+
+      client.persist.should.be.false;
+
+      client.persist = false;
+
+      client.persist.should.be.false;
+      client.options.headers.should.not.have.property('Connection');
+    });
+  });
+
   describe('#get', function () {
 
     describe('given a valid path', function () {
