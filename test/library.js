@@ -28,15 +28,50 @@ describe('Zotero.Library', function () {
       glib.type.should.eql('group');
     });
 
-    it('uses passed-in headers to set client default headers', function () {
-      (new Library({ headers: { qux: 'quux' } })).client.options.headers.
-        should.have.property('qux', 'quux');
+    it('uses passed-in headers to set default headers', function () {
+      (new Library({ headers: { qux: 'quux' } })).headers.should.have.property('qux', 'quux');
     });
   });
 
   describe('#client', function () {
     it('returns a Zotero.Client instance', function () {
       library.client.should.be.an.instanceof(Client);
+    });
+  });
+
+  describe('#get', function () {
+    beforeEach(function () { sinon.stub(library.client, 'get'); });
+    afterEach(function () { library.client.get.restore(); });
+
+    it('passes along library headers', function () {
+      library.get('foo');
+
+      library.client.get.called.should.be.true;
+      library.client.get.args[0][2].should.be.empty;
+
+      library.headers.bar = 'baz';
+
+      library.get('foo');
+      library.client.get.args[1][2].should.have.property('bar', 'baz');
+    });
+
+    it('it includes the API key in the header by default', function () {
+      library.key = 'foo';
+      library.get('foo');
+
+      library.client.get.called.should.be.true;
+      library.client.get.args[0][2].should.have.property('Authentication', 'Bearer foo');
+    });
+
+    it('it includes the API key as a parameter for version 2', function () {
+      library.client.version = 2;
+      library.key = 'foo';
+
+      library.get('foo');
+
+      library.client.get.called.should.be.true;
+      library.client.get.args[0][2].should.be.empty;
+      library.client.get.args[0][1].should.have.property('key', 'foo');
     });
   });
 
