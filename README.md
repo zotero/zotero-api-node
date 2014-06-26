@@ -75,10 +75,10 @@ If you just want to quickly print information about a message, pass-in
 
     > lib.items('KWENT2ZM', { format: 'csljson' }, zotero.print);
 
-    zotero:node Path:     /users/475425/items/KWENT2ZM?format=csljson +4m
-    zotero:node Status:   200 +1ms
-    zotero:node Type:     json +0ms
-    zotero:node Headers:  {"zotero-api-version":"1","content-length":"148","connection":"close","content-type":"application/vnd.citationstyles.csl+json"} +0ms
+    zotero:node Path:     /users/475425/items/KWENT2ZM?format=csljson +0ms
+    zotero:node Status:   200 +2ms
+    zotero:node Type:     json +1ms
+    zotero:node Headers:  {"date":"Thu, 26 Jun 2014 10:36:07 GMT","server":"Apache/2.2.15 (CentOS)","zotero-api-version":"2","content-length":"148","connection":"close","content-type":"application/vnd.citationstyles.csl+json"} +0ms
     zotero:node Content:  {"items":[{"id":"392648/KWENT2ZM","type":"webpage","title":"Zotero | Home","URL":"http://staging.zotero.net/","accessed":{"raw":"2011-06-28"}}]} +0ms
 
 
@@ -86,7 +86,24 @@ What about promises?
 --------------------
 Zotero-Node uses standard Node.js style callbacks out of the box, but you can
 easily promisify the API. Simply call `zotero.promisify` passing in the Promise
-implementation of your choice.
+implementation's promisify variant of your choice.
+
+    // For Bluebird:
+    zotero.promisify(Promise.promisify.bind(Promise));
+
+    // For Q:
+    zotero.promisify(Q.denodeify.bind(Q));
+
+This will promisify the Client's request method; as a result `Client#get` and
+all Library getters will return a Promise instead of a Message object. If you
+want to access the message object before it is sent, you can still do so: all
+messages are stored in `client.messages` before they are sent.
+
+You can undo the promisification at any time by calling:
+
+    zotero.promisify.restore();
+
+
 
 License
 -------
