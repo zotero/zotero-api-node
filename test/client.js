@@ -213,5 +213,17 @@ describe('Zotero.Client', function () {
       client.state.timestamp -= 10000;
       client.state.limited.should.eql(0);
     });
+
+    it('has a reason if limitied', function () {
+      (client.state.reason === undefined).should.be.true;
+      client.state.retry = 1;
+      client.state.reason.should.eql('unknown');
+      client.state.backoff = 1;
+      client.state.reason.should.eql('overload; unknown');
+      client.state.code = 429;
+      client.state.reason.should.eql('overload; too many requests');
+      client.state.code = 503;
+      client.state.reason.should.eql('overload; service unavailable');
+    });
   });
 });
