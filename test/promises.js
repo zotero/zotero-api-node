@@ -5,7 +5,7 @@ var zotero = require('..'),
 
 describe('When using Promises', function () {
   before(function () {
-    zotero.promisify(Promise.promisify);
+    zotero.promisify(Promise.promisify.bind(Promise));
   });
 
   after(function () { zotero.promisify.restore(); });

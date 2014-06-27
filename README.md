@@ -97,7 +97,26 @@ implementation's promisify variant of your choice.
 This will promisify the Client's request method; as a result `Client#get` and
 all Library getters will return a Promise instead of a Message object. If you
 want to access the message object before it is sent, you can still do so: all
-messages are stored in `client.messages` before they are sent.
+messages are stored in `client.messages` before they are sent; messages are
+added at the start of the list, so your last message will always be at index
+zero in the queue.
+
+    // Using Bluebird promises, fetch the top 5 items of a library:
+    var promise = lib.items.top({ limit: 5 });
+
+    // If you need to modify the message before it is sent, you
+    // can access it at the start of the client's message queue.
+    lib.client.messages[0].req.getHeader('Zotero-API-Version');
+     
+    // Handle the API response or errors when the promise is
+    // resolved or rejected:
+    promise
+      .then(function (message) {
+        // Handle the Zotero API response...
+      })
+      .catch(function (error) {
+        // Handle any errors...
+      });
 
 You can undo the promisification at any time by calling:
 
