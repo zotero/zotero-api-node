@@ -216,9 +216,9 @@ describe('Zotero.Client', function () {
 
     it('has a reason if limitied', function () {
       (client.state.reason === undefined).should.be.true;
-      client.state.retry = 1;
+      client.state.retry = 10000;
       client.state.reason.should.eql('unknown');
-      client.state.backoff = 1;
+      client.state.backoff = 1000;
       client.state.reason.should.eql('overload; unknown');
       client.state.code = 429;
       client.state.reason.should.eql('overload; too many requests');
