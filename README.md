@@ -107,6 +107,18 @@ Now, if you make a call that returns an Atom feed, it will be parsed automatical
 
 Rate-Limiting
 -------------
+Zotero-Node observes rate-limit directives by default, so you should not have
+to worry about them. The headers of each response are parsed by the client; if
+there are any `Retry-After` or `Backoff` headers, the client will switch into
+limited mode; all messages you send in limited mode, will be held back, until
+the limited period has expired.
+
+If you want to check the client's state, you can do so by calling
+`client.state.limited` – this will return the time until the limited period
+will be expired; if `limited` is zero, the client is in normal mode.
+
+If you want to force the client to send messages in limited mode, you can do
+so by calling `client.flush(true)` with the force flag set to true.
 
 What about promises?
 --------------------
