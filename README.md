@@ -81,6 +81,32 @@ If you just want to quickly print information about a message, pass-in
     zotero:node Headers:  {"date":"Thu, 26 Jun 2014 10:36:07 GMT","server":"Apache/2.2.15 (CentOS)","zotero-api-version":"2","content-length":"148","connection":"close","content-type":"application/vnd.citationstyles.csl+json"} +0ms
     zotero:node Content:  {"items":[{"id":"392648/KWENT2ZM","type":"webpage","title":"Zotero | Home","URL":"http://staging.zotero.net/","accessed":{"raw":"2011-06-28"}}]} +0ms
 
+Message Parsing
+---------------
+Zotero-Node was written with the Zotero API v3 in mind and, by default, will parse
+JSON responses automatically. Contents are accessible in the `message.data` property
+once the response has been received. Other content-types will be saved as strings
+using the appropriate encoding. Having said that, it is very easy to add your own message
+parsers to Zotero-Node, by addingthe them to `zotero.Messages.parsers`. For instance,
+we could add a parser for Atom resonses like this:
+
+
+    var zotero = require('zotero');
+    var xml2js = require('xml2js').parseString;
+
+    zotero.Message.parsers.atom = function (data, callback) {
+      return xml2js(data.toString(this.encoding), callback);
+    };
+
+Now, if you make a call that returns an Atom feed, it will be parsed automatically:
+
+    lib.items.top({ format: 'atom', limit: 2 }, function (error, message) {
+      if (error) return console.log(error.message);
+      console.dir(message.data.feed);
+    });
+
+Rate-Limiting
+-------------
 
 What about promises?
 --------------------
