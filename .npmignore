@@ -1,0 +1,17 @@
+# VIM/Emacs
+*.swp
+*~
+
+# Travis-CI configuration
+.travis.yml
+
+# Coverage directory used by tools like istanbul
+coverage
+
+# Generated API docs
+doc
+docs
+
+# Locale dependencies
+node_modules
+
