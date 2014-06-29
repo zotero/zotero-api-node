@@ -87,8 +87,8 @@ Zotero-Node was written with the Zotero API v3 in mind and, by default, will par
 JSON responses automatically. Contents are accessible in the `message.data` property
 once the response has been received. Other content-types will be saved as strings
 using the appropriate encoding. Having said that, it is very easy to add your own message
-parsers to Zotero-Node, by addingthe them to `zotero.Messages.parsers`. For instance,
-we could add a parser for Atom resonses like this:
+parsers to Zotero-Node, by adding them to `zotero.Messages.parsers`. For instance,
+we could add a parser for Atom responses like this:
 
 
     var zotero = require('zotero');
