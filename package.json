@@ -1,6 +1,6 @@
 {
   "name": "zotero",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "description": "Zotero API client",
   "main": "lib/zotero.js",
   "scripts": {
