@@ -60,7 +60,7 @@ describe('Zotero.Library', function () {
       library.get('foo');
 
       library.client.get.called.should.be.true;
-      library.client.get.args[0][2].should.have.property('Authentication', 'Bearer foo');
+      library.client.get.args[0][2].should.have.property('Authorization', 'Bearer foo');
     });
 
     it('it includes the API key as a parameter for version 2', function () {
