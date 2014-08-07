@@ -1,10 +1,6 @@
 {
   "name": "zotero",
-<<<<<<< HEAD
-  "version": "0.0.4",
-=======
   "version": "0.0.5",
->>>>>>> 7f20aa0eaa88e2136135786a2c00d8e96fde9e15
   "description": "Zotero API client",
   "main": "lib/zotero.js",
   "scripts": {
