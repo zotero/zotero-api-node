@@ -21,7 +21,7 @@ describe('Zotero.Client', function () {
     it('is true if the `Connection: keep-alive` default header is set', function () {
       client.persist.should.be.false;
       client.options.headers.should.not.have.property('Connection');
-      
+
       client.persist = true;
 
       client.persist.should.be.true;
@@ -183,7 +183,7 @@ describe('Zotero.Client', function () {
 
       nock('https://api.zotero.org')
         .get(path)
-        .reply(200, { foo: 23 }, { 'Retry-After': 42, 'Backoff': 11 });
+        .reply(200, [], { 'Retry-After': 42, 'Backoff': 11 });
 
       client.state.retry.should.eql(0);
       client.state.backoff.should.eql(0);
@@ -198,6 +198,35 @@ describe('Zotero.Client', function () {
       client.state.backoff.should.eql(0);
     });
 
+    it('parses the response link headers', function (done) {
+      var path = '/users/475425/collections/9KH9TNSJ/items';
+
+      nock('https://api.zotero.org')
+        .get(path)
+        .reply(200, [], { Link: [
+          '<https://api.zotero.org/users/12345/items?limit=30&start=30>; rel="next"',
+          '<https://api.zotero.org/users/12345/items?limit=30&start=5040>; rel="last"'
+        ].join(', ') });
+
+      client.get(path, function (error, message) {
+        (!error).should.be.true;
+
+        message.code.should.eql(200);
+
+        message.should.have.properties('headers', 'links');
+
+        message.links.should.have.properties('next', 'last');
+
+        message.links.next.should.have.properties('path', 'options');
+
+        message.links.next.path.should.eql('/users/12345/items');
+
+        message.links.next.options.should.have.property('limit', '30');
+        message.links.next.options.should.have.property('start', '30');
+
+        done();
+      });
+    });
   });
 
   describe('#state', function () {
