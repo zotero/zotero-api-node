@@ -3,6 +3,7 @@ var nock = require('nock');
 var Message = require('../lib/message');
 
 describe('Zotero.Message', function () {
+  var m;
 
   it('is a constructor', function () { Message.should.be.a.Function; });
 
@@ -22,9 +23,27 @@ describe('Zotero.Message', function () {
     });
   });
 
-  describe('#send', function () {
-    var m;
+  describe('#error', function () {
+    beforeEach(function () { m = new Message(); });
 
+    it('is undefined if response has not been received', function () {
+      (m.error === undefined).should.be.true;
+    });
+
+    it('is undefined if response status is ok', function () {
+      m.received = true;
+      m.res = { statusCode: 200 };
+
+      (m.error === undefined).should.be.true;
+    });
+
+    it('returns an error otherwise', function () {
+      m.received = true;
+      m.error.should.be.instanceOf(Error);
+    });
+  });
+
+  describe('#send', function () {
     beforeEach(function () { m = new Message(); });
 
     it('fails if the message has not been bound', function () {
