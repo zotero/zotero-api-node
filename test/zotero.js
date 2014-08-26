@@ -1,5 +1,4 @@
 var zotero = require('..'),
-  debug = require('debug'),
   sinon = require('sinon');
 
 describe('zotero', function () {

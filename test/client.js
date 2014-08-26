@@ -1,7 +1,6 @@
 var Client = require('../lib/client'),
   Message = require('../lib/message'),
-  nock = require('nock'),
-  sinon = require('sinon');
+  nock = require('nock');
 
 describe('Zotero.Client', function () {
   var client;
@@ -149,7 +148,7 @@ describe('Zotero.Client', function () {
         .get(path)
         .reply(404, 'Not found', { 'Content-Type': 'text/plain' });
 
-      client.get(path, function (error, message) {
+      client.get(path, function (error) {
         error.code.should.eql(404);
         error.message.should.match(/not found/i);
 
