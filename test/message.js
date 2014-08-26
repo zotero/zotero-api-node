@@ -88,7 +88,6 @@ describe('Zotero.Message', function () {
           m.received.should.be.true;
 
           m.code.should.eql(200);
-          m.data.should.eql('ok');
           m.ok.should.be.true;
 
           done();
