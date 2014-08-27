@@ -1,6 +1,7 @@
 {
   "env": {
-    "node": true
+    "node": true,
+	"mocha": true
   },
   "rules": {
     // warnings
@@ -10,7 +11,7 @@
     "radix": 1,
     "no-warning-comments": 1,
     "no-redeclare": 1,
-    "no-unused-expressions": 1,
+    "no-unused-expressions": 0,
     "no-native-reassign": 1,
     "no-unreachable": 1,
     "no-fallthrough": 1,
@@ -18,7 +19,7 @@
     "no-comma-dangle": 1,
     "no-cond-assign": 1,
     "space-return-throw-case": 1,
-    "max-nested-callbacks": [1, 3],
+    "max-nested-callbacks": [1, 6],
     "quotes": [1, "single", "avoid-escape"],
     "complexity": [1, 10],
 

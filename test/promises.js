@@ -1,7 +1,6 @@
 var zotero = require('..'),
   nock = require('nock'),
-  Promise = require('bluebird'),
-  sinon = require('sinon');
+  Promise = require('bluebird');
 
 describe('When using Promises', function () {
   before(function () {
