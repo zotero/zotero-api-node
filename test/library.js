@@ -29,7 +29,8 @@ describe('Zotero.Library', function () {
     });
 
     it('uses passed-in headers to set default headers', function () {
-      (new Library({ headers: { qux: 'quux' } })).headers.should.have.property('qux', 'quux');
+      (new Library({ headers: { qux: 'quux' } }))
+        .headers.should.have.property('qux', 'quux');
     });
   });
 
@@ -60,7 +61,8 @@ describe('Zotero.Library', function () {
       library.get('foo');
 
       library.client.get.called.should.be.true;
-      library.client.get.args[0][2].should.have.property('Authorization', 'Bearer foo');
+      library.client.get.args[0][2]
+        .should.have.property('Authorization', 'Bearer foo');
     });
 
     it('it includes the API key as a parameter for version 2', function () {
@@ -122,7 +124,9 @@ describe('Zotero.Library', function () {
     });
 
     describe('#top', function () {
-      it('is a function', function () { library.items.top.should.be.a.Function; });
+      it('is a function', function () {
+        library.items.top.should.be.a.Function;
+      });
 
       it('calls #get with items/top', function () {
         library.items.top();
@@ -135,9 +139,11 @@ describe('Zotero.Library', function () {
     });
 
     describe('#trash', function () {
-      it('is a function', function () { library.items.trash.should.be.a.Function; });
+      it('is a function', function () {
+        library.items.trash.should.be.a.Function;
+      });
 
-      it('calls #get with items/top', function () {
+      it('calls #get with items/trash', function () {
         library.items.trash();
         library.get.called.should.be.true;
         library.get.args[0][0].should.eql('items/trash');
@@ -145,7 +151,9 @@ describe('Zotero.Library', function () {
     });
 
     describe('#children', function () {
-      it('is a function', function () { library.items.children.should.be.a.Function; });
+      it('is a function', function () {
+        library.items.children.should.be.a.Function;
+      });
 
       it('calls #get with items/:id/children', function () {
         library.items.children(42);
@@ -159,7 +167,9 @@ describe('Zotero.Library', function () {
     });
 
     describe('#tags', function () {
-      it('is a function', function () { library.items.tags.should.be.a.Function; });
+      it('is a function', function () {
+        library.items.tags.should.be.a.Function;
+      });
 
       it('calls #get with items/:id/tags', function () {
         library.items.tags(42);
@@ -177,7 +187,9 @@ describe('Zotero.Library', function () {
     beforeEach(function () { sinon.stub(library, 'get'); });
     afterEach(function () { library.get.restore(); });
 
-    it('is a function', function () { library.collections.should.be.a.Function; });
+    it('is a function', function () {
+      library.collections.should.be.a.Function;
+    });
 
     it('cannot be re-assigned', function () {
       library.collections = null;
@@ -212,7 +224,9 @@ describe('Zotero.Library', function () {
     });
 
     describe('#tags', function () {
-      it('is a function', function () { library.collections.tags.should.be.a.Function; });
+      it('is a function', function () {
+        library.collections.tags.should.be.a.Function;
+      });
 
       it('calls #get with collections/:id/tags', function () {
         library.collections.tags(42);
@@ -222,7 +236,9 @@ describe('Zotero.Library', function () {
     });
 
     describe('#items', function () {
-      it('is a function', function () { library.collections.items.should.be.a.Function; });
+      it('is a function', function () {
+        library.collections.items.should.be.a.Function;
+      });
 
       it('calls #get with collections/:id/items', function () {
         library.collections.items(5);
@@ -235,7 +251,9 @@ describe('Zotero.Library', function () {
       });
 
       describe('#top', function () {
-        it('is a function', function () { library.collections.items.top.should.be.a.Function; });
+        it('is a function', function () {
+          library.collections.items.top.should.be.a.Function;
+        });
 
         it('calls #get with collections/:id/items/top', function () {
           library.collections.items.top(5);
