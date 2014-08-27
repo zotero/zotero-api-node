@@ -96,5 +96,37 @@ describe('Zotero.Message', function () {
         m.send();
       });
     });
+
+    describe('when the response is a redirect', function () {
+      beforeEach(function () {
+        nock('https://api.zotero.org')
+          .get('/users/42/items')
+          .reply(302, '', {
+            Location: 'https://api.zotero.org/users/43/items'
+          });
+
+        nock('https://api.zotero.org')
+          .get('/users/43/items')
+          .reply(200, 'ok');
+
+        m.bind({
+          host: 'api.zotero.org',
+          path: '/users/42/items'
+        });
+      });
+
+      it('follows the redirect', function (done) {
+        m.on('received', function () {
+          m.sent.should.be.true;
+
+          m.code.should.eql(200);
+          m.data.toString().should.eql('ok');
+
+          done();
+        });
+
+        m.send();
+      });
+    });
   });
 });
