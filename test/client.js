@@ -1,3 +1,5 @@
+'use strict';
+
 var Client = require('../lib/client'),
   Message = require('../lib/message'),
   nock = require('nock');

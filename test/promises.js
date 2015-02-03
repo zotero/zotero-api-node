@@ -1,10 +1,12 @@
+'use strict';
+
 var zotero = require('..'),
   nock = require('nock'),
-  Promise = require('bluebird');
+  B = require('bluebird');
 
 describe('When using Promises', function () {
   before(function () {
-    zotero.promisify(Promise.promisify.bind(Promise));
+    zotero.promisify(B.promisify.bind(B));
   });
 
   after(function () { zotero.promisify.restore(); });
@@ -34,7 +36,7 @@ describe('When using Promises', function () {
         });
 
         it('returns the a promise object', function () {
-          client.get(path).should.be.instanceof(Promise);
+          client.get(path).should.be.instanceof(B);
         });
 
         it('adds the message to the message queue and flushes it', function (done) {
@@ -65,4 +67,3 @@ describe('When using Promises', function () {
     });
   });
 });
-

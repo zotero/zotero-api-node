@@ -1,3 +1,5 @@
+'use strict';
+
 var sinon = require('sinon');
 var nock = require('nock');
 var Message = require('../lib/message');
@@ -13,7 +15,7 @@ describe('Zotero.Message', function () {
     });
 
     it('is false if there is a next link', function () {
-      var m = new Message();
+      m = new Message();
 
       m.links = {};
       m.done.should.be.true;

@@ -1,3 +1,5 @@
+'use strict';
+
 var zotero = require('..');
 //var sinon = require('sinon');
 

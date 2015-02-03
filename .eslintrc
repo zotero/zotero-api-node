@@ -1,7 +1,7 @@
 {
   "env": {
     "node": true,
-	"mocha": true
+    "mocha": true
   },
   "rules": {
     // warnings
@@ -31,6 +31,8 @@
     "no-dupe-keys": 2,
     "no-empty-class": 2,
     "no-self-compare": 2,
+    "strict": 2,
+    "global-strict": [2, "always"],
     "valid-typeof": 2,
     "no-unused-vars": 2,
     "handle-callback-err": 2,
@@ -42,6 +44,10 @@
     "new-cap": 2,
     "no-spaced-func": 2,
     "no-space-before-semi": 2,
-    "space-unary-word-ops": 2
+
+    // ignore
+    "curly": 0,
+    "dot-notation": 0,
+    "no-multi-spaces": 0
   }
 }

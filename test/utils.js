@@ -1,3 +1,5 @@
+'use strict';
+
 var utils = require('../lib/utils');
 
 describe('Zotero.utils', function () {

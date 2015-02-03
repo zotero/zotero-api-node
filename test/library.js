@@ -1,3 +1,5 @@
+'use strict';
+
 var Library = require('../lib/library'),
   Client = require('../lib/client'),
   sinon = require('sinon');
@@ -112,11 +114,6 @@ describe('Zotero.Library', function () {
 
     it('is a function', function () { library.items.should.be.a.Function; });
 
-    it('cannot be removed', function () {
-      library.items = null;
-      library.items.should.be.a.Function;
-    });
-
     it('calls #get with items/:id', function () {
       library.items('foo');
       library.get.called.should.be.true;
@@ -188,11 +185,6 @@ describe('Zotero.Library', function () {
     afterEach(function () { library.get.restore(); });
 
     it('is a function', function () {
-      library.collections.should.be.a.Function;
-    });
-
-    it('cannot be re-assigned', function () {
-      library.collections = null;
       library.collections.should.be.a.Function;
     });
 
@@ -319,4 +311,3 @@ describe('Zotero.Library', function () {
     });
   });
 });
-

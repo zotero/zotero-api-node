@@ -1,3 +1,5 @@
+'use strict';
+
 var proxy = require('../lib/proxy'),
   sinon = require('sinon');
 
@@ -70,4 +72,3 @@ describe('zotero.proxy', function () {
 
   });
 });
-
