@@ -49,6 +49,7 @@
     "camelcase": 0,
     "curly": 0,
     "dot-notation": 0,
+    "no-console": 0,
     "no-multi-spaces": 0
   }
 }

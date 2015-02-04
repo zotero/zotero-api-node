@@ -27,7 +27,7 @@
     "eslint": "*",
     "istanbul": "~0.2.11",
     "mocha": "1.20.x",
-    "nock": "~0.34.1",
+    "nock": "~0.37",
     "should": "4.0.x",
     "sinon": "1.10.x",
     "watch": "0.10.x",
