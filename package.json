@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "debug": "*",
+    "eventsource": "^0.1.4",
     "mime-types": "~1.0.0"
   }
 }
