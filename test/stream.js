@@ -12,7 +12,7 @@ describe('Zotero.Stream', function () {
   describe('given a simple stream', function () {
 
     beforeEach(function () {
-      nock(Stream.defaults.url)
+      nock('https://stream.zotero.org')
         .get('/')
         .reply(
           200,
