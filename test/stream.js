@@ -1,7 +1,9 @@
 'use strict';
 
+var EventEmitter = require('events').EventEmitter;
+
 var Stream = require('../lib/stream');
-//var Message = require('../lib/message'),
+var Client = require('../lib/client');
 var nock = require('nock');
 var EventSource = require('eventsource');
 
@@ -33,6 +35,14 @@ describe('Zotero.Stream', function () {
     it('creates an event source instance', function () {
       (new Stream({ key: 'abc123' })).eventsource.should.be.instanceof(EventSource);
     });
+
+    it('inherits from Client and EventEmitter', function () {
+      var s = new Stream({ key: 'abc123' });
+
+      s.should.be.instanceof(Client);
+      s.should.be.instanceof(EventEmitter);
+    });
+
 
     it('does not set the connection id', function (done) {
       (new Stream({ key: 'abc123' })).on('connected', function () {
@@ -137,6 +147,52 @@ describe('Zotero.Stream', function () {
       s.on('error', function () {
         called.should.eql(1);
         done();
+      });
+    });
+
+    describe('#subscribe', function () {
+      it('sends a subscribe POST request', function (done) {
+
+        nock('https://stream.zotero.org')
+          .post('/connections/foobar', {
+            subscriptions: [
+              { apiKey: 'foo' }
+            ]
+          })
+          .reply(201);
+
+        (new Stream())
+          .once('connected', function () {
+
+            this.subscribe({ apiKey: 'foo' }, function (error, message) {
+              (!error).should.be.true;
+
+              message.code.should.eql(201);
+
+              done();
+            });
+          });
+      });
+    });
+
+    describe('#unsubscribe', function () {
+      it('sends an unsubscribe DELETE request', function (done) {
+
+        nock('https://stream.zotero.org')
+          .delete('/connections/foobar', { apiKey: 'foo' })
+          .reply(204);
+
+        (new Stream())
+          .once('connected', function () {
+
+            this.unsubscribe({ apiKey: 'foo' }, function (error, message) {
+              (!error).should.be.true;
+
+              message.code.should.eql(204);
+
+              done();
+            });
+          });
       });
     });
   });
