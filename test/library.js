@@ -355,6 +355,24 @@ describe('Zotero.Library', function () {
         s.should.be.instanceof(Stream);
       });
 
+      it('uses the library API key if present', function (done) {
+        nock('https://stream.zotero.org')
+          .post('/connections/foobar', {
+            subscriptions: [{
+              apiKey: 'qwerty',
+              topics: [ '/users/12345' ]
+            }]
+          })
+          .reply(201);
+
+        library.key = 'qwerty';
+
+        library.stream(function (error) {
+          (!error).should.be.true;
+          done();
+        });
+      });
+
       it('fails if the subscription request fails', function (done) {
         nock('https://stream.zotero.org')
           .post('/connections/foobar')
