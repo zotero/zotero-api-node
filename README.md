@@ -38,12 +38,9 @@ When creating a Library you can pass-in a Client instance using the
 `client` property; if you don't, a default Client will be created for
 you. You can access the client through the library:
 
-    > // Make the client use version 2 of the Zotero API
-    > lib.client.version = 2;
-
     > // The default HTTP headers used by the client
     > lib.client.options.headers;
-    { 'Zotero-API-Version': '2', 'User-Agent': 'zotero-node/0.0.1' }
+    { 'Zotero-API-Version': '3', 'User-Agent': 'zotero-node/0.0.1' }
 
     > // Let's make the client re-use the TCP connection to the server
     > lib.client.persist = true;
@@ -105,6 +102,47 @@ Now, if you make a call that returns an Atom feed, it will be parsed automatical
       console.dir(message.data.feed);
     });
 
+Stream API
+----------
+Zotero-Node supports the Zotero Stream API through zotero.Stream. To create
+a single key stream, simply pass your Zotero API key to the constructor:
+
+    var stream = new zotero.Stream({ key: 'your-zotero-api-key' });
+
+You can then register handlers for all events:
+
+    stream.on('topicUpdated', function (evt) {
+      console.log(evt.data.topic);
+      console.log(evt.data.version);
+    });
+
+If you create a stream without a key, it will default to a multi key
+stream. Once the stream has been established, you can manage your
+subscriptions using the `.subscribe` and `.unsubscribe` methods.
+
+    (new zotero.Stream())
+      .on('connected', function () {
+        this.subscribe([
+          { apiKey: 'abc123' },
+          { apiKey: 'efd456', topics: [ '/users/12345' ] }
+        ]);
+      });
+
+You can also create a multi-key stream for a given Zotero user or group
+library, by using the `.stream` method on the library instance. This will
+automatically create the stream and subscribe to the current library,
+using the library's API key (if present):
+
+    zotero({ user: '475425' })
+      .stream(function (error, stream) {
+
+        // This will set up a stream and subscribe to
+        // the topic '/users/475425'. The callback will
+        // be called once the subscription has been
+        // accepted (or if there was an error).
+
+      });
+
 Rate-Limiting
 -------------
 Zotero-Node observes rate-limit directives by default, so you should not have
@@ -145,7 +183,7 @@ zero in the queue.
     // If you need to modify the message before it is sent, you
     // can access it at the start of the client's message queue.
     lib.client.messages[0].req.getHeader('Zotero-API-Version');
-     
+
     // Handle the API response or errors when the promise is
     // resolved or rejected:
     promise
@@ -154,6 +192,14 @@ zero in the queue.
       })
       .catch(function (error) {
         // Handle any errors...
+      });
+
+Note that the Stream API also uses promieses now:
+
+    lib
+      .stream()
+      .then(function (stream) {
+        // ...
       });
 
 You can undo the promisification at any time by calling:
