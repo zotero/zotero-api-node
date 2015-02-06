@@ -249,6 +249,8 @@ describe('Zotero.Client', function () {
           message.data.should.have.property('success');
           message.data.success.should.have.property('0', 'abc123');
 
+          message.req.getHeader('content-type').should.eql('application/json');
+
           done();
         });
       });
