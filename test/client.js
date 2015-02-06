@@ -47,6 +47,7 @@ describe('Zotero.Client', function () {
       client.options.headers.should.have.property('Zotero-API-Version', '2');
     });
   });
+
   describe('#get', function () {
 
     describe('given a valid path', function () {
@@ -226,6 +227,30 @@ describe('Zotero.Client', function () {
         message.links.next.options.should.have.property('start', '30');
 
         done();
+      });
+    });
+  });
+
+  describe('#post', function () {
+    describe('given a body object', function () {
+      var path = '/users/475425/items';
+
+      beforeEach(function() {
+        nock('https://api.zotero.org')
+          .post(path, '{"title":"foo"}')
+          .reply(200, { success: { 0: 'abc123' }});
+      });
+
+      it('sends a JSON body', function (done) {
+        client.post(path, null, { title: 'foo' }, function (error, message) {
+          (!error).should.be.true;
+
+          message.code.should.eql(200);
+          message.data.should.have.property('success');
+          message.data.success.should.have.property('0', 'abc123');
+
+          done();
+        });
       });
     });
   });
