@@ -1,8 +1,11 @@
 'use strict';
 
-var Library = require('../lib/library'),
-  Client = require('../lib/client'),
-  sinon = require('sinon');
+var sinon = require('sinon');
+var nock  = require('nock');
+
+var Library = require('../lib/library');
+var Client  = require('../lib/client');
+var Stream  = require('../lib/stream');
 
 describe('Zotero.Library', function () {
   var library;
@@ -309,5 +312,88 @@ describe('Zotero.Library', function () {
       library.get.args[0][0].should.eql('searches');
       library.get.args[1][0].should.eql('searches/foo');
     });
+  });
+
+  describe('#stream', function () {
+
+    describe('when the event stream works', function () {
+      beforeEach(function () {
+        library.user = 12345;
+
+        nock('https://stream.zotero.org')
+          .get('/')
+          .reply(
+            200,
+
+            'event: connected\n' +
+            'data: {"connectionId":"foobar"}\n\n' +
+            'event: topicUpdated\n' +
+            'data: {"topic":"foo","version":23}\n\n',
+
+            {
+              'Content-Type': 'text/event-stream'
+            }
+          );
+      });
+
+      it('creates a library stream', function (done) {
+        nock('https://stream.zotero.org')
+          .post('/connections/foobar', {
+            subscriptions: [{
+              topics: [ '/users/12345' ]
+            }]
+          })
+          .reply(201);
+
+        var s = library.stream(function (error, stream) {
+          (!error).should.be.true;
+          s.should.be.equal(stream);
+
+          done();
+        });
+
+        s.should.be.instanceof(Stream);
+      });
+
+      it('fails if the subscription request fails', function (done) {
+        nock('https://stream.zotero.org')
+          .post('/connections/foobar')
+          .reply(413);
+
+        library.stream(function (error) {
+          (!error).should.be.false;
+          done();
+        });
+      });
+    });
+
+    describe('when the event stream does not work', function () {
+      beforeEach(function () {
+        library.user = 12345;
+
+        nock('https://stream.zotero.org')
+          .get('/')
+          .reply(
+            200,
+
+            'event: connected\n' +
+            'data: {}\n\n' +
+            'event: topicUpdated\n' +
+            'data: {"topic":"foo","version":23}\n\n',
+
+            {
+              'Content-Type': 'text/event-stream'
+            }
+          );
+      });
+
+      it('calls back with an error', function (done) {
+        library.stream(function (error) {
+          (!error).should.be.false;
+          done();
+        });
+      });
+    });
+
   });
 });
