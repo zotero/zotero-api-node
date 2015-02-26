@@ -14,7 +14,7 @@ describe('Zotero.Client', function () {
   describe('#options', function () {
     it('has default values', function () {
       client.should.have.property('options');
-      client.options.should.have.property('host', Client.defaults.host);
+      client.options.should.have.property('hostname', Client.defaults.hostname);
     });
   });
 
