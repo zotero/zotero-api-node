@@ -21,7 +21,7 @@
     "space-return-throw-case": 1,
     "max-nested-callbacks": [1, 6],
     "quotes": [1, "single", "avoid-escape"],
-    "complexity": [1, 10],
+    "complexity": [1, 12],
 
     // errors
     "use-isnan": 2,
