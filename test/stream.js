@@ -1,5 +1,7 @@
 'use strict';
 
+var sinon = require('sinon');
+
 var EventEmitter = require('events').EventEmitter;
 
 var Stream = require('../lib/stream');
@@ -7,12 +9,19 @@ var Client = require('../lib/client');
 
 describe('Zotero.Stream', function () {
 
+  before(function () {
+    sinon.stub(Stream.prototype, 'open', function () {
+      this.socket = sinon.stub();
+      return this;
+    });
+  });
+
   it('is a constructor', function () { Stream.should.be.a.Function; });
 
   describe('given a simple single-key stream', function () {
 
     it('creates a websocket instance', function () {
-      (new Stream({ key: 'abc123' })).should.have.property('ws');
+      (new Stream({ key: 'abc123' })).should.have.property('socket');
     });
 
     it('inherits from Client and EventEmitter', function () {
@@ -22,108 +31,32 @@ describe('Zotero.Stream', function () {
       s.should.be.instanceof(EventEmitter);
     });
 
-    it('sends the api key as a header', function () {
+    it('is not a multi-key stream', function () {
+      (new Stream({ key: 'abc123' })).should.have.property('multi', false);
     });
 
-    it('listeners can be added', function (done) {
-      var s = new Stream({ key: 'abc123' });
-      var called = 0;
-
-      s.on('topicAdded', function () { ++called; });
-
-      // Error called when stream terminates!
-      s.on('error', function () {
-        called.should.eql(2);
-        done();
-      });
-    });
-
-    it('listeners can be removed', function (done) {
-      var s = new Stream({ key: 'abc123' });
-      var called = 0;
-
-      function listener() {
-        s.removeListener('topicAdded', listener);
-        called++;
-      }
-
-      s.on('topicAdded', listener);
-
-      // Error called when stream terminates!
-      s.on('error', function () {
-        called.should.eql(1);
-        done();
-      });
+    it('sets the API key header', function () {
+      (new Stream({ key: 'abc123' }).options)
+        .should.have.property('headers')
+        .and.have.property('Zotero-API-Key', 'abc123');
     });
   });
 
   describe('given a simple multi-key stream', function () {
 
-    it('creates an event source instance', function () {
-      (new Stream()).should.have.property('ws');
+    it('creates a websocket instance', function () {
+      (new Stream()).should.have.property('socket');
     });
 
-    it('listeners can be added', function (done) {
-      var s = new Stream();
-      var called = 0;
-
-      s.on('topicUpdated', function () { ++called; });
-
-      // Error called when stream terminates!
-      s.on('error', function () {
-        called.should.eql(2);
-        done();
-      });
+    it('is a multi-key stream', function () {
+      (new Stream()).should.have.property('multi', true);
     });
 
-    it('listeners can be removed', function (done) {
-      var s = new Stream();
-      var called = 0;
-
-      function listener() {
-        s.removeListener('topicUpdated', listener);
-        called++;
-      }
-
-      s.on('topicUpdated', listener);
-
-      // Error called when stream terminates!
-      s.on('error', function () {
-        called.should.eql(1);
-        done();
-      });
+    it('does not set the API key header', function () {
+      (new Stream().options)
+        .should.have.property('headers')
+        .and.not.have.property('Zotero-API-Key');
     });
 
-    describe('#subscribe', function () {
-      it('sends a subscribe message', function (done) {
-
-        (new Stream())
-          .once('connected', function () {
-
-            this.subscribe({ apiKey: 'foo' }, function (error) {
-              (!error).should.be.true;
-
-              done();
-            });
-          });
-      });
-    });
-
-    describe('#unsubscribe', function () {
-      it('sends an unsubscribe message', function (done) {
-
-        (new Stream())
-          .once('connected', function () {
-
-            this.unsubscribe({ apiKey: 'foo' }, function (error, message) {
-              (!error).should.be.true;
-
-              message.code.should.eql(204);
-
-              done();
-            });
-          });
-      });
-    });
   });
 });
