@@ -4,36 +4,15 @@ var EventEmitter = require('events').EventEmitter;
 
 var Stream = require('../lib/stream');
 var Client = require('../lib/client');
-var nock = require('nock');
-var EventSource = require('eventsource');
 
 describe('Zotero.Stream', function () {
 
   it('is a constructor', function () { Stream.should.be.a.Function; });
 
   describe('given a simple single-key stream', function () {
-    beforeEach(function () {
-      nock('https://stream.zotero.org')
-        .get('/?apiKey=abc123')
-        .reply(
-          200,
 
-          'retry: 1000\n\n' +
-          'event: connected\n' +
-          'data: {"topics":["foobar"]}\n\n' +
-          'event: topicAdded\n' +
-          'data: {"topic":"foo","version":23}\n\n' +
-          'event: topicAdded\n' +
-          'data: {"topic":"foo","version":24}\n\n',
-
-          {
-            'Content-Type': 'text/event-stream'
-          }
-        );
-    });
-
-    it('creates an event source instance', function () {
-      (new Stream({ key: 'abc123' })).eventsource.should.be.instanceof(EventSource);
+    it('creates a websocket instance', function () {
+      (new Stream({ key: 'abc123' })).should.have.property('ws');
     });
 
     it('inherits from Client and EventEmitter', function () {
@@ -43,14 +22,7 @@ describe('Zotero.Stream', function () {
       s.should.be.instanceof(EventEmitter);
     });
 
-
-    it('does not set the connection id', function (done) {
-      (new Stream({ key: 'abc123' })).on('connected', function () {
-        this.should.be.instanceof(Stream);
-        (this.connection === undefined).should.be.true;
-
-        done();
-      });
+    it('sends the api key as a header', function () {
     });
 
     it('listeners can be added', function (done) {
@@ -86,37 +58,9 @@ describe('Zotero.Stream', function () {
   });
 
   describe('given a simple multi-key stream', function () {
-    beforeEach(function () {
-      nock('https://stream.zotero.org')
-        .get('/')
-        .reply(
-          200,
-
-          'retry: 1000\n\n' +
-          'event: connected\n' +
-          'data: {"connectionId":"foobar"}\n\n' +
-          'event: topicUpdated\n' +
-          'data: {"topic":"foo","version":23}\n\n' +
-          'event: topicUpdated\n' +
-          'data: {"topic":"bar","version":24}\n\n',
-
-          {
-            'Content-Type': 'text/event-stream'
-          }
-        );
-    });
 
     it('creates an event source instance', function () {
-      (new Stream()).eventsource.should.be.instanceof(EventSource);
-    });
-
-    it('sets the connection id', function (done) {
-      (new Stream()).on('connected', function () {
-        this.should.be.instanceof(Stream);
-        this.connection.should.eql('foobar');
-
-        done();
-      });
+      (new Stream()).should.have.property('ws');
     });
 
     it('listeners can be added', function (done) {
@@ -151,23 +95,13 @@ describe('Zotero.Stream', function () {
     });
 
     describe('#subscribe', function () {
-      it('sends a subscribe POST request', function (done) {
-
-        nock('https://stream.zotero.org')
-          .post('/connections/foobar', {
-            subscriptions: [
-              { apiKey: 'foo' }
-            ]
-          })
-          .reply(201);
+      it('sends a subscribe message', function (done) {
 
         (new Stream())
           .once('connected', function () {
 
-            this.subscribe({ apiKey: 'foo' }, function (error, message) {
+            this.subscribe({ apiKey: 'foo' }, function (error) {
               (!error).should.be.true;
-
-              message.code.should.eql(201);
 
               done();
             });
@@ -176,11 +110,7 @@ describe('Zotero.Stream', function () {
     });
 
     describe('#unsubscribe', function () {
-      it('sends an unsubscribe DELETE request', function (done) {
-
-        nock('https://stream.zotero.org')
-          .delete('/connections/foobar', { apiKey: 'foo' })
-          .reply(204);
+      it('sends an unsubscribe message', function (done) {
 
         (new Stream())
           .once('connected', function () {
