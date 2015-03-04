@@ -7,6 +7,8 @@ var EventEmitter = require('events').EventEmitter;
 var Stream = require('../lib/stream');
 var Client = require('../lib/client');
 
+var Subscriptions = Stream.Subscriptions;
+
 describe('Zotero.Stream', function () {
 
   before(function () {
@@ -58,5 +60,26 @@ describe('Zotero.Stream', function () {
         .and.not.have.property('Zotero-API-Key');
     });
 
+  });
+});
+
+describe('Zotero.Stream.Subscriptions', function () {
+
+  it('is a constructor', function () { Subscriptions.should.be.a.Function; });
+
+  describe('instance', function () {
+    var s;
+
+    beforeEach(function () { s = new Subscriptions(); });
+
+    it('has an array of all subscriptions', function () {
+      s.should.have.property('all', []);
+    });
+
+    describe('.add', function () {
+    });
+
+    describe('.remove', function () {
+    });
   });
 });
