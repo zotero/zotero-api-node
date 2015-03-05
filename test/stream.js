@@ -108,10 +108,92 @@ describe('Zotero.Stream.Subscriptions', function () {
 
         s.all.should.have.length(2);
         s.topics.should.eql(['foo', 'bar']);
+
+        s.update([{ apiKey: 'x' }]);
+
+        s.all.should.have.length(2);
+        s.topics.should.eql(['foo']);
+      });
+    });
+
+    describe('.cancel', function () {
+      beforeEach(function () {
+        s.update([ { topics: ['foo'] }, { apiKey: 'x', topics: ['bar', 'baz'] } ]);
+      });
+
+      it('cancels all subscriptions for a given key', function () {
+        s.cancel([{ apiKey: 'x' }]);
+
+        s.all.should.have.length(1);
+        s.topics.should.eql(['foo']);
+      });
+
+      it('cancels specific key/topic pair', function () {
+        s.cancel([{ apiKey: 'x', topic: 'baz' }]);
+
+        s.all.should.have.length(2);
+        s.topics.should.eql(['foo', 'bar']);
+      });
+
+      it('cancels public topic', function () {
+        s.cancel([{ topic: 'foo' }]);
+
+        s.all.should.have.length(2);
+        s.topics.should.eql(['bar', 'baz']);
+      });
+
+      it('does not fail on non-existent keys/topics', function () {
+        s.cancel.bind(s, [{ apiKey: 'y' }]).should.not.throw();
+        s.cancel.bind(s, [{ apiKey: 'y', topic: 'qux' }]).should.not.throw();
+        s.cancel.bind(s, [{ topic: 'qux' }]).should.not.throw();
+
+        s.all.should.have.length(2);
+        s.topics.should.eql(['foo', 'bar', 'baz']);
+      });
+    });
+
+    describe('.add', function () {
+      beforeEach(function () {
+        s.update([ { topics: ['foo'] }, { apiKey: 'x' } ]);
+      });
+
+      it('adds a topic to an existing subscription', function () {
+        s.add({ topic: 'bar' });
+
+        s.topics.should.eql(['foo', 'bar']);
+        s.get().topics.should.eql(['foo', 'bar']);
+
+        s.add({ topic: 'baz', apiKey: 'x' });
+
+        s.topics.should.eql(['foo', 'bar', 'baz']);
+        s.get().topics.should.eql(['foo', 'bar']);
+        s.get('x').topics.should.eql(['baz']);
+      });
+
+      it('fails if subscription does not exist', function () {
+        s.add.bind(s, [{ topic: 'baz', apiKey: 'y' }]).should.throw();
       });
     });
 
     describe('.remove', function () {
+      beforeEach(function () {
+        s.update([ { topics: ['foo'] }, { apiKey: 'x' } ]);
+      });
+
+      it('removes a single topic from existing subscriptions', function () {
+        s.remove({ topic: 'foo' });
+
+        s.all.should.have.length(2);
+        s.topics.should.be.empty;
+      });
+
+      it('does not fail if subscription does not exist', function () {
+        s.remove.bind(s, { topic: 'baz', apiKey: 'y' }).should.not.throw();
+      });
+
+      it('does not fails if the topic was not part of the subscription', function () {
+        s.remove.bind(s, { topic: 'baz' }).should.not.throw();
+      });
     });
   });
 });
