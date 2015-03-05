@@ -11,6 +11,7 @@ var Subscriptions = Stream.Subscriptions;
 
 describe('Zotero.Stream', function () {
 
+
   before(function () {
     // Stub the open method to create a simple
     // EventEmitter instead of a WebSocket!
@@ -25,6 +26,21 @@ describe('Zotero.Stream', function () {
 
   describe('given a simple single-key stream', function () {
     var s;
+
+    var MSG = {
+      connected: {
+        event: 'connected', retry: 333, topics: ['/users/123456', '/groups/234567']
+      },
+      updated: {
+        event: 'topicUpdated', topic: '/users/123456', version: 678
+      },
+      added: {
+        event: 'topicAdded', topic: '/groups/345678'
+      },
+      removed: {
+        event: 'topicRemoved', topic: '/groups/234567'
+      }
+    };
 
     beforeEach(function () { s = new Stream({ key: 'abc123' }); });
 
@@ -48,12 +64,7 @@ describe('Zotero.Stream', function () {
     });
 
     describe('on connected', function () {
-      var message = {
-        event: 'connected',
-        retry: 333,
-        topics: ['/users/123456', '/groups/234567']
-      };
-
+      var message = MSG.connected;
       var cb = sinon.spy();
 
       beforeEach(function () {
@@ -73,6 +84,41 @@ describe('Zotero.Stream', function () {
 
       it('emits the connected event', function () {
         cb.called.should.be.true;
+      });
+    });
+
+    describe('topic added/removed events', function () {
+      beforeEach(function () {
+        s.socket.emit('open');
+        s.socket.emit('message', JSON.stringify(MSG.connected));
+      });
+
+      it('adds topics to existing subscriptions', function () {
+      });
+
+      it('removes topics to existing subscriptions', function () {
+      });
+
+      it('emits the events and data', function () {
+        var spy = sinon.spy();
+
+        s.on('topicAdded', spy);
+        s.on('topicRemoved', spy);
+        s.on('topicUpdated', spy);
+        s.on('foo', spy);
+
+        s.socket.emit('message', JSON.stringify(MSG.updated));
+        s.socket.emit('message', JSON.stringify(MSG.added));
+        s.socket.emit('message', JSON.stringify(MSG.updated));
+        s.socket.emit('message', JSON.stringify(MSG.removed));
+        s.socket.emit('message', JSON.stringify({ event: 'foo' }));
+
+        spy.callCount.should.eql(5);
+        spy.args[0][0].should.have.property('topic', MSG.updated.topic);
+        spy.args[1][0].should.have.property('topic', MSG.added.topic);
+        spy.args[2][0].should.have.property('version', MSG.updated.version);
+        spy.args[3][0].should.have.property('topic', MSG.removed.topic);
+        spy.args[4][0].should.be.empty;
       });
     });
   });
