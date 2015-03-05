@@ -1,10 +1,11 @@
 'use strict';
 
 var sinon = require('sinon');
+var EventEmitter = require('events').EventEmitter;
 
 var Library = require('../lib/library');
 var Client  = require('../lib/client');
-//var Stream  = require('../lib/stream');
+var Stream  = require('../lib/stream');
 
 describe('Zotero.Library', function () {
   var library;
@@ -314,10 +315,37 @@ describe('Zotero.Library', function () {
   });
 
   describe('#stream', function () {
+    var stream, callback;
+
+    before(function () {
+      // Stub the open method to create a simple
+      // EventEmitter instead of a WebSocket!
+      sinon.stub(Stream.prototype, 'open', function () {
+        this.socket = new EventEmitter();
+        this.bind();
+
+        this.socket.send = sinon.stub().yields();
+
+        return this;
+      });
+    });
+
+    after(function () { Stream.prototype.open.restore(); });
+
+    beforeEach(function () {
+      callback = sinon.spy();
+
+      library.user = 12345;
+      stream = library.stream(callback);
+    });
+
+    it('returns a stream', function () {
+      stream.should.be.instanceof(Stream);
+    });
 
     describe('when the event stream works', function () {
       beforeEach(function () {
-        library.user = 12345;
+        stream.socket.emit('message', '{"event":"connected"}');
       });
 
       it('connects to the stream API');
@@ -331,14 +359,12 @@ describe('Zotero.Library', function () {
 
     describe('when the event stream does not work', function () {
       beforeEach(function () {
-        library.user = 12345;
+        stream.socket.emit('error', 'too-bad');
       });
 
       it('calls back with an error', function () {
-        //library.stream(function (error) {
-        //  (!error).should.be.false;
-        //  done();
-        //});
+        callback.called.should.be.true;
+        callback.args[0][0].should.be.instanceof(Error);
       });
     });
 

@@ -27,6 +27,8 @@ describe('Zotero.Stream', function () {
     });
   });
 
+  after(function () { Stream.prototype.open.restore(); });
+
   it('is a constructor', function () { Stream.should.be.a.Function; });
 
   describe('given a simple single-key stream', function () {
@@ -135,7 +137,7 @@ describe('Zotero.Stream', function () {
         s.on('topicUpdated', spy);
         s.on('foo', spy);
 
-        s.socket.emit('message', JSON.stringify(MSG.updated));
+        s.socket.emit('message', JSON.stringify(MSG.updated), {});
         s.socket.emit('message', JSON.stringify(MSG.added));
         s.socket.emit('message', JSON.stringify(MSG.updated));
         s.socket.emit('message', JSON.stringify(MSG.removed));
@@ -223,7 +225,7 @@ describe('Zotero.Stream', function () {
         sinon.spy(stream, 'emit');
       });
 
-      afterEach(function () { stream.emit.reset(); });
+      afterEach(function () { stream.emit.restore(); });
 
       it('sends a create subscription message', function () {
         stream.subscribe(MSG.subscribe.subscriptions);
