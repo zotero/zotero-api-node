@@ -62,6 +62,10 @@ describe('Zotero.Stream', function () {
       s.should.have.property('multi', false);
     });
 
+    it('has an URL', function () {
+      s.should.have.property('url');
+    });
+
     it('sets the API key header', function () {
       s.options
         .should.have.property('headers')
@@ -253,13 +257,21 @@ describe('Zotero.Stream', function () {
       });
 
       describe('when not connected', function () {
+        var cb;
+
         beforeEach(function () {
+          cb = sinon.spy();
+
           stream.socket.readyState = WS.CONNECTING;
-          stream.subscribe(MSG.subscribe.subscriptions);
+          stream.subscribe(MSG.subscribe.subscriptions, cb);
         });
 
         it('does not send the subscription message', function () {
           stream.socket.send.called.should.be.false;
+        });
+
+        it('does not call the callback', function () {
+          cb.called.should.be.false;
         });
 
         it('adds the subscriptions locally', function () {
@@ -279,6 +291,10 @@ describe('Zotero.Stream', function () {
             stream.socket.send.called.should.be.true;
           });
 
+          it('calls the callback', function () {
+            cb.called.should.be.true;
+          });
+
           describe('on created/errors', function () {
             beforeEach(function () {
               stream.socket.emit('message', JSON.stringify(message));
@@ -292,12 +308,47 @@ describe('Zotero.Stream', function () {
             });
           });
         });
-
       });
-
     });
 
     describe('.unsubscribe', function () {
+
+      beforeEach(function () {
+        sinon.spy(stream.subscriptions, 'cancel');
+        sinon.spy(stream, 'emit');
+
+        stream.socket.readyState = WS.OPEN;
+        stream.unsubscribe({ apiKey: 'foo' });
+      });
+
+      afterEach(function () {
+        stream.subscriptions.cancel.reset();
+        stream.emit.reset();
+      });
+
+      it('cancels subscriptions locally', function () {
+        stream.subscriptions.cancel.calledWith([{ apiKey: 'foo' }]);
+      });
+
+      it('sends the unsubscription message', function () {
+        stream.socket.send.calledOnce.should.be.true;
+
+        stream.socket.send.args[0][0].should.have.property('action', 'deleteSubscriptions');
+
+        stream.socket.send.args[0][0]
+          .should.have.property('subscriptions')
+          .and.have.length(1);
+      });
+
+      describe('on confirm', function () {
+        beforeEach(function () {
+          stream.socket.emit('message', '{"event": "subscriptionsDeleted"}');
+        });
+
+        it('emits the event', function () {
+          stream.emit.lastCall.args[0].should.eql('subscriptionsDeleted');
+        });
+      });
     });
   });
 });
