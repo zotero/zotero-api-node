@@ -12,8 +12,11 @@ var Subscriptions = Stream.Subscriptions;
 describe('Zotero.Stream', function () {
 
   before(function () {
+    // Stub the open method to create a simple
+    // EventEmitter instead of a WebSocket!
     sinon.stub(Stream.prototype, 'open', function () {
-      this.socket = sinon.stub();
+      this.socket = new EventEmitter();
+      this.bind();
       return this;
     });
   });
@@ -21,26 +24,56 @@ describe('Zotero.Stream', function () {
   it('is a constructor', function () { Stream.should.be.a.Function; });
 
   describe('given a simple single-key stream', function () {
+    var s;
+
+    beforeEach(function () { s = new Stream({ key: 'abc123' }); });
 
     it('creates a websocket instance', function () {
-      (new Stream({ key: 'abc123' })).should.have.property('socket');
+      s.should.have.property('socket');
     });
 
     it('inherits from Client and EventEmitter', function () {
-      var s = new Stream({ key: 'abc123' });
-
       s.should.be.instanceof(Client);
       s.should.be.instanceof(EventEmitter);
     });
 
     it('is not a multi-key stream', function () {
-      (new Stream({ key: 'abc123' })).should.have.property('multi', false);
+      s.should.have.property('multi', false);
     });
 
     it('sets the API key header', function () {
-      (new Stream({ key: 'abc123' }).options)
+      s.options
         .should.have.property('headers')
         .and.have.property('Zotero-API-Key', 'abc123');
+    });
+
+    describe('on connected', function () {
+      var message = {
+        event: 'connected',
+        retry: 333,
+        topics: ['/users/123456', '/groups/234567']
+      };
+
+      var cb = sinon.spy();
+
+      beforeEach(function () {
+        s.on('connected', cb);
+
+        s.socket.emit('open');
+        s.socket.emit('message', JSON.stringify(message));
+      });
+
+      it('adds the topics to the subscription list', function () {
+        s.subscriptions.topics.should.eql(message.topics);
+      });
+
+      it('updates the retry value', function () {
+        s.retry.delay.should.eql(message.retry);
+      });
+
+      it('emits the connected event', function () {
+        cb.called.should.be.true;
+      });
     });
   });
 
