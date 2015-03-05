@@ -76,7 +76,39 @@ describe('Zotero.Stream.Subscriptions', function () {
       s.should.have.property('all', []);
     });
 
-    describe('.add', function () {
+    it('has an array of all topics', function () {
+      s.should.have.property('topics', []);
+    });
+
+    describe('.update', function () {
+      it('adds new subscriptions', function () {
+        s.update([
+          { apiKey: 'foo', topics: ['foo', 'bar'] },
+          { topics: ['baz'] },
+          { apiKey: 'qux' }
+        ]);
+
+        s.all.should.have.length(3);
+        s.topics.should.eql(['foo', 'bar', 'baz']);
+      });
+
+      it('updates existing subscriptions', function () {
+        s.update([{ topics: ['foo', 'bar'] }]);
+        s.update([{ topics: ['foo' ] }]);
+
+        s.all.should.have.length(1);
+        s.topics.should.eql(['foo']);
+
+        s.update([{ apiKey: 'x' }]);
+
+        s.all.should.have.length(2);
+        s.topics.should.eql(['foo']);
+
+        s.update([{ apiKey: 'x', topics: ['bar'] }]);
+
+        s.all.should.have.length(2);
+        s.topics.should.eql(['foo', 'bar']);
+      });
     });
 
     describe('.remove', function () {
