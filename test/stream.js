@@ -94,6 +94,7 @@ describe('Zotero.Stream', function () {
       });
 
       it('adds topics to existing subscriptions', function () {
+        s.subscriptions.topics.should.not.contain(MSG.added.topic);
       });
 
       it('removes topics to existing subscriptions', function () {
