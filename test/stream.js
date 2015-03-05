@@ -1,8 +1,11 @@
+/*eslint max-nested-callbacks:0 */
+
 'use strict';
 
 var sinon = require('sinon');
 
 var EventEmitter = require('events').EventEmitter;
+var WS = require('ws');
 
 var Stream = require('../lib/stream');
 var Client = require('../lib/client');
@@ -11,13 +14,15 @@ var Subscriptions = Stream.Subscriptions;
 
 describe('Zotero.Stream', function () {
 
-
   before(function () {
     // Stub the open method to create a simple
     // EventEmitter instead of a WebSocket!
     sinon.stub(Stream.prototype, 'open', function () {
       this.socket = new EventEmitter();
       this.bind();
+
+      this.socket.send = sinon.stub().yields();
+
       return this;
     });
   });
@@ -61,6 +66,15 @@ describe('Zotero.Stream', function () {
       s.options
         .should.have.property('headers')
         .and.have.property('Zotero-API-Key', 'abc123');
+    });
+
+    it('emits an error on invalid message reception', function () {
+      var failed = sinon.spy();
+
+      s.on('error', failed);
+      s.socket.emit('message', 'badc0de');
+
+      failed.called.should.be.true;
     });
 
     describe('on connected', function () {
@@ -134,23 +148,160 @@ describe('Zotero.Stream', function () {
   });
 
   describe('given a simple multi-key stream', function () {
+    var stream;
+
+    var MSG = {
+      subscribe: {
+        action: 'createSubscriptions',
+        subscriptions: [
+          {
+            apiKey: 'abcdefghijklmn1234567890',
+            topics: ['/users/123456', '/groups/456789']
+          },
+          {
+            apiKey: 'bcdefghijklmn12345678901'
+          },
+          {
+            topics: ['/groups/567890', '/groups/12345']
+          }
+        ]
+      },
+      subscribed: {
+        event: 'subscriptionsCreated',
+        subscriptions: [
+          {
+            apiKey: 'abcdefghijklmn1234567890',
+            topics: ['/users/123456']
+          },
+          {
+            apiKey: 'bcdefghijklmn2345678901',
+            topics: ['/users/345678']
+          },
+          {
+            topics: ['/groups/12345']
+          }
+        ],
+        errors: [
+          {
+            apiKey: 'abcdefghijklmn1234567890',
+            topic: '/groups/456789',
+            error: 'Topic is not valid for provided API key'
+          },
+          {
+            topic: '/groups/567890',
+            error: 'Topic is not accessible without an API key'
+          }
+        ]
+      }
+    };
+
+    beforeEach(function () { stream = new Stream(); });
 
     it('creates a websocket instance', function () {
-      (new Stream()).should.have.property('socket');
+      stream.should.have.property('socket');
     });
 
     it('is a multi-key stream', function () {
-      (new Stream()).should.have.property('multi', true);
+      stream.should.have.property('multi', true);
     });
 
     it('does not set the API key header', function () {
-      (new Stream().options)
+      stream.options
         .should.have.property('headers')
         .and.not.have.property('Zotero-API-Key');
     });
 
+    describe('.subscribe', function () {
+      var message = MSG.subscribed;
+
+      beforeEach(function () {
+        stream.socket.readyState = WS.OPEN;
+        sinon.spy(stream, 'emit');
+      });
+
+      afterEach(function () { stream.emit.reset(); });
+
+      it('sends a create subscription message', function () {
+        stream.subscribe(MSG.subscribe.subscriptions);
+
+        stream.socket.send.called.should.be.true;
+
+        stream.socket.send.args[0][0]
+          .should.have.property('action', MSG.subscribe.action);
+
+        stream.socket.send.args[0][0]
+          .should.have.property('subscriptions')
+          .and.have.length(MSG.subscribe.subscriptions.length);
+      });
+
+      describe('when successful', function () {
+        beforeEach(function () {
+          stream.socket.emit('message', JSON.stringify(message));
+        });
+
+        it('updates the local subscriptions', function () {
+          stream.subscriptions.topics
+            .should.containEql(message.subscriptions[0].topics[0]);
+          stream.subscriptions.topics
+            .should.not.containEql(message.errors[0].topic);
+        });
+
+        it('emits the event', function () {
+          stream.emit.called.should.be.true;
+          stream.emit.lastCall.args[0].should.eql(message.event);
+        });
+      });
+
+      describe('when not connected', function () {
+        beforeEach(function () {
+          stream.socket.readyState = WS.CONNECTING;
+          stream.subscribe(MSG.subscribe.subscriptions);
+        });
+
+        it('does not send the subscription message', function () {
+          stream.socket.send.called.should.be.false;
+        });
+
+        it('adds the subscriptions locally', function () {
+          stream.subscriptions.topics
+            .should.containEql(message.subscriptions[0].topics[0]);
+          stream.subscriptions.topics
+            .should.containEql(message.errors[0].topic);
+        });
+
+        describe('once connected', function () {
+          beforeEach(function () {
+            stream.socket.readyState = WS.OPEN;
+            stream.socket.emit('open');
+          });
+
+          it('sends the subscription message', function () {
+            stream.socket.send.called.should.be.true;
+          });
+
+          describe('on created/errors', function () {
+            beforeEach(function () {
+              stream.socket.emit('message', JSON.stringify(message));
+            });
+
+            it('updates local subscriptions accordingly', function () {
+              stream.subscriptions.topics
+                .should.containEql(message.subscriptions[0].topics[0]);
+              stream.subscriptions.topics
+                .should.not.containEql(message.errors[0].topic);
+            });
+          });
+        });
+
+      });
+
+    });
+
+    describe('.unsubscribe', function () {
+    });
   });
 });
+
 
 describe('Zotero.Stream.Subscriptions', function () {
 
