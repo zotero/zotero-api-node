@@ -94,10 +94,19 @@ describe('Zotero.Stream', function () {
       });
 
       it('adds topics to existing subscriptions', function () {
-        s.subscriptions.topics.should.not.contain(MSG.added.topic);
+        s.subscriptions.topics.should.not.containEql(MSG.added.topic);
+
+        s.socket.emit('message', JSON.stringify(MSG.added));
+
+        s.subscriptions.topics.should.containEql(MSG.added.topic);
       });
 
       it('removes topics to existing subscriptions', function () {
+        s.subscriptions.topics.should.containEql(MSG.removed.topic);
+
+        s.socket.emit('message', JSON.stringify(MSG.removed));
+
+        s.subscriptions.topics.should.not.containEql(MSG.added.topic);
       });
 
       it('emits the events and data', function () {
