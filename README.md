@@ -109,7 +109,8 @@ a single key stream, simply pass your Zotero API key to the constructor:
 
     var stream = new zotero.Stream({ apiKey: 'your-zotero-api-key' });
 
-You can then register handlers for all events:
+You can then register handlers for all events (e.g., `topicUpdated`,
+`topicRemoved`, `topicAdded`, `subscriptionsCreated`, etc.):
 
     stream.on('topicUpdated', function (data) {
       console.log(data.topic);
@@ -127,6 +128,10 @@ subscriptions using the `.subscribe` and `.unsubscribe` methods.
           { apiKey: 'efd456', topics: [ '/users/12345' ] }
         ]);
       });
+
+Alternatively, you can add your subscriptions even before the stream
+has been connected (the subscriptions messages will be sent automatically
+once the connection has been established).
 
 You can also create a multi-key stream for a given Zotero user or group
 library, by using the `.stream` method on the library instance. This will
