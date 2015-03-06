@@ -5,8 +5,9 @@ Zotero-Node
 
 A Zotero API client package for Node.js. This package tries to make it
 as easy as possible to bootstrap a Zotero client application in Node.js;
-it comes with hardly any runtime dependencies and provides three simple
-abstractions to interact with Zotero: `Client`, `Library`, and `Message`.
+it comes with hardly any runtime dependencies and provides four simple
+abstractions to interact with Zotero: `Client`, `Library`, `Message`,
+`Stream`.
 
 Clients handle the HTTPS connection to a Zotero data server, observing
 any rate-limiting directives issued by the server; you can configure
@@ -16,7 +17,10 @@ with a Client instance; a Library offers many convenience methods to
 make it easy to construct Zotero API requests. Each request and the
 corresponding response are then encapsulated in a Message instance, wich
 provides accessors and an extendable body parser collection to handle
-the various formats supported by Zotero.
+the various formats supported by Zotero. The Stream class, finally,
+uses a WebSocket connection to access the Zotero Streaming API, manages
+the subscription list locally, and automatically tries to re-open
+prematurely closed connections.
 
 Quickstart
 ----------
@@ -104,8 +108,8 @@ Now, if you make a call that returns an Atom feed, it will be parsed automatical
 
 Stream API
 ----------
-Zotero-Node supports the Zotero Stream API through zotero.Stream. To create
-a single key stream, simply pass your Zotero API key to the constructor:
+Zotero-Node supports the Zotero Stream API through `zotero.Stream`. To create
+a single-key stream, simply pass your Zotero API key to the constructor:
 
     var stream = new zotero.Stream({ apiKey: 'your-zotero-api-key' });
 
@@ -117,7 +121,7 @@ You can then register handlers for all events (e.g., `topicUpdated`,
       console.log(data.version);
     });
 
-If you create a stream without a key, it will default to a multi key
+If you create a stream without a key, it will default to a multi-key
 stream. Once the stream has been established, you can manage your
 subscriptions using the `.subscribe` and `.unsubscribe` methods.
 
@@ -130,10 +134,10 @@ subscriptions using the `.subscribe` and `.unsubscribe` methods.
       });
 
 Alternatively, you can add your subscriptions even before the stream
-has been connected (the subscriptions messages will be sent automatically
-once the connection has been established).
+has been connected: the respective `createSubscriptions` message will
+be sent automatically once the connection has been established.
 
-You can also create a multi-key stream for a given Zotero user or group
+You can also create a multi-key stream for a given Zotero user/group
 library, by using the `.stream` method on the library instance. This will
 automatically create the stream and subscribe to the current library,
 using the library's API key (if present):
