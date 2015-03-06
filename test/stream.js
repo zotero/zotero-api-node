@@ -22,15 +22,108 @@ describe('Zotero.Stream', function () {
     sinon.stub(Stream.prototype, 'open', function () {
       this.socket = new EventEmitter();
       this.bind();
+
       this.socket.send = sinon.stub().yields();
+      this.socket.close = sinon.spy(function (code) {
+        this.readyState = WS.CLOSED;
+        this.emit('close', code);
+      });
+
+      this.socket.readyState = WS.OPEN;
+      this.socket.emit('open');
+
       return this;
     });
   });
 
   after(function () { Stream.prototype.open.restore(); });
 
-
   it('is a constructor', function () { Stream.should.be.a.Function; });
+
+  describe('given an open stream', function () {
+    var stream;
+
+    beforeEach(function () {
+      stream = new Stream();
+
+      sinon.spy(stream, 'emit');
+    });
+
+    describe('.close()', function () {
+      it('closes the socket', function () {
+        var socket = stream.socket;
+
+        socket.close.called.should.be.false;
+        stream.close();
+        socket.close.called.should.be.true;
+      });
+
+      it('deletes the socket', function () {
+        stream.close();
+        stream.should.not.have.property('socket');
+      });
+
+      it('emits the close event', function () {
+        stream.close();
+        stream.emit.called.should.be.true;
+        stream.emit.lastCall.args[0].should.eql('close');
+        stream.emit.lastCall.args[1].should.eql(1000);
+      });
+
+      it('does not re-connect', function () {
+        stream.close();
+        stream.retry.should.not.have.property('timeout');
+      });
+    });
+
+    describe('when closed unexpectedly', function () {
+      beforeEach(function () {
+        stream.retry.delay = 15;
+        stream.socket.readyState = WS.CLOSED;
+      });
+
+      it('tries to re-connect', function (done) {
+        stream.on('open', function () {
+          stream.retry.should.not.have.property('timeout');
+          done();
+        });
+
+        stream.subscriptions.empty.should.be.true;
+        stream.retry.should.not.have.property('timeout');
+        stream.socket.emit('close', 4000);
+        stream.retry.should.have.property('timeout');
+      });
+
+      describe('on-reconnect', function () {
+        beforeEach(function () {
+          stream.socket.emit('message', JSON.stringify(F.subscriptionsCreated));
+        });
+
+        it('tries to restore the subscriptions', function (done) {
+          stream.on('open', function () {
+            stream.retry.should.not.have.property('timeout');
+
+            stream.subscriptions.empty.should.be.true;
+            stream.socket.send.called.should.be.true;
+
+            stream.socket.send.args[0][0]
+              .should.have.property('action', 'createSubscriptions');
+
+            stream.socket.send.args[0][0]
+              .should.have.property('subscriptions')
+              .and.eql(F.subscriptionsCreated.subscriptions);
+
+            done();
+          });
+
+          stream.subscriptions.empty.should.be.false;
+          stream.socket.send.called.should.be.false;
+          stream.socket.emit('close');
+        });
+      });
+    });
+  });
+
 
   describe('given a simple single-key stream', function () {
     var s;
