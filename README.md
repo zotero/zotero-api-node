@@ -107,13 +107,13 @@ Stream API
 Zotero-Node supports the Zotero Stream API through zotero.Stream. To create
 a single key stream, simply pass your Zotero API key to the constructor:
 
-    var stream = new zotero.Stream({ key: 'your-zotero-api-key' });
+    var stream = new zotero.Stream({ apiKey: 'your-zotero-api-key' });
 
 You can then register handlers for all events:
 
-    stream.on('topicUpdated', function (evt) {
-      console.log(evt.data.topic);
-      console.log(evt.data.version);
+    stream.on('topicUpdated', function (data) {
+      console.log(data.topic);
+      console.log(data.version);
     });
 
 If you create a stream without a key, it will default to a multi key
@@ -142,6 +142,15 @@ using the library's API key (if present):
         // accepted (or if there was an error).
 
       });
+
+Each stream keeps track of its subscriptions locally; call
+`stream.subscriptions.all` to see your current subscriptions.
+
+You can close a stream at any time by calling `stream.close()`; if the
+stream is closed unexpectedly, the stream will automatically wait for
+the `retry` interval (sent by the Zotero API with the `connected` event)
+and then try to re-connect. Once the connection is established, the stream
+will attempt to restore your previous subscriptions.
 
 Rate-Limiting
 -------------
@@ -210,6 +219,6 @@ You can undo the promisification at any time by calling:
 
 License
 -------
-Copyright 2014 Sylvester Keil. All rights reserved.
+Copyright 2014-2015 Zotero. All rights reserved.
 
 Zotero-Node is licensed under the AGPL3 license. See LICENSE for details.

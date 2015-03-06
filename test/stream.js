@@ -128,7 +128,7 @@ describe('Zotero.Stream', function () {
   describe('given a simple single-key stream', function () {
     var s;
 
-    beforeEach(function () { s = new Stream({ key: 'abc123' }); });
+    beforeEach(function () { s = new Stream({ apiKey: 'abc123' }); });
 
     it('creates a websocket instance', function () {
       s.should.have.property('socket');
