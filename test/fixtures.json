@@ -1,0 +1,64 @@
+{
+  "stream": {
+    "connected": {
+      "event": "connected",
+      "retry": 333,
+      "topics": ["/users/123456", "/groups/234567"]
+    },
+    "topicUpdated": {
+      "event": "topicUpdated",
+      "topic": "/users/123456",
+      "version": 678
+    },
+    "topicAdded": {
+      "event": "topicAdded",
+      "topic": "/groups/345678"
+    },
+    "topicRemoved": {
+      "event": "topicRemoved",
+      "topic": "/groups/234567"
+    },
+    "createSubscriptions": {
+      "action": "createSubscriptions",
+      "subscriptions": [
+        {
+          "apiKey": "abcdefghijklmn1234567890",
+          "topics": ["/users/123456", "/groups/456789"]
+        },
+        {
+          "apiKey": "bcdefghijklmn12345678901"
+        },
+        {
+          "topics": ["/groups/567890", "/groups/12345"]
+        }
+      ]
+    },
+    "subscriptionsCreated": {
+      "event": "subscriptionsCreated",
+      "subscriptions": [
+        {
+          "apiKey": "abcdefghijklmn1234567890",
+          "topics": ["/users/123456"]
+        },
+        {
+          "apiKey": "bcdefghijklmn2345678901",
+          "topics": ["/users/345678"]
+        },
+        {
+          "topics": ["/groups/12345"]
+        }
+      ],
+      "errors": [
+        {
+          "apiKey": "abcdefghijklmn1234567890",
+          "topic": "/groups/456789",
+          "error": "Topic is not valid for provided API key"
+        },
+        {
+          "topic": "/groups/567890",
+          "error": "Topic is not accessible without an API key"
+        }
+      ]
+    }
+  }
+}

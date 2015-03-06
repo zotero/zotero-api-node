@@ -12,6 +12,8 @@ var Client = require('../lib/client');
 
 var Subscriptions = Stream.Subscriptions;
 
+var F = require('./fixtures.json').stream;
+
 describe('Zotero.Stream', function () {
 
   before(function () {
@@ -33,21 +35,6 @@ describe('Zotero.Stream', function () {
 
   describe('given a simple single-key stream', function () {
     var s;
-
-    var MSG = {
-      connected: {
-        event: 'connected', retry: 333, topics: ['/users/123456', '/groups/234567']
-      },
-      updated: {
-        event: 'topicUpdated', topic: '/users/123456', version: 678
-      },
-      added: {
-        event: 'topicAdded', topic: '/groups/345678'
-      },
-      removed: {
-        event: 'topicRemoved', topic: '/groups/234567'
-      }
-    };
 
     beforeEach(function () { s = new Stream({ key: 'abc123' }); });
 
@@ -84,7 +71,7 @@ describe('Zotero.Stream', function () {
     });
 
     describe('on connected', function () {
-      var message = MSG.connected;
+      var message = F.connected;
       var cb = sinon.spy();
 
       beforeEach(function () {
@@ -108,25 +95,30 @@ describe('Zotero.Stream', function () {
     });
 
     describe('topic added/removed events', function () {
+
+      var ADDED   = F.topicAdded;
+      var REMOVED = F.topicRemoved;
+      var UPDATED = F.topicUpdated;
+
       beforeEach(function () {
         s.socket.emit('open');
-        s.socket.emit('message', JSON.stringify(MSG.connected));
+        s.socket.emit('message', JSON.stringify(F.connected));
       });
 
       it('adds topics to existing subscriptions', function () {
-        s.subscriptions.topics.should.not.containEql(MSG.added.topic);
+        s.subscriptions.topics.should.not.containEql(ADDED.topic);
 
-        s.socket.emit('message', JSON.stringify(MSG.added));
+        s.socket.emit('message', JSON.stringify(ADDED));
 
-        s.subscriptions.topics.should.containEql(MSG.added.topic);
+        s.subscriptions.topics.should.containEql(ADDED.topic);
       });
 
       it('removes topics to existing subscriptions', function () {
-        s.subscriptions.topics.should.containEql(MSG.removed.topic);
+        s.subscriptions.topics.should.containEql(REMOVED.topic);
 
-        s.socket.emit('message', JSON.stringify(MSG.removed));
+        s.socket.emit('message', JSON.stringify(REMOVED));
 
-        s.subscriptions.topics.should.not.containEql(MSG.added.topic);
+        s.subscriptions.topics.should.not.containEql(REMOVED.topic);
       });
 
       it('emits the events and data', function () {
@@ -137,17 +129,17 @@ describe('Zotero.Stream', function () {
         s.on('topicUpdated', spy);
         s.on('foo', spy);
 
-        s.socket.emit('message', JSON.stringify(MSG.updated), {});
-        s.socket.emit('message', JSON.stringify(MSG.added));
-        s.socket.emit('message', JSON.stringify(MSG.updated));
-        s.socket.emit('message', JSON.stringify(MSG.removed));
+        s.socket.emit('message', JSON.stringify(UPDATED), {});
+        s.socket.emit('message', JSON.stringify(ADDED));
+        s.socket.emit('message', JSON.stringify(UPDATED));
+        s.socket.emit('message', JSON.stringify(REMOVED));
         s.socket.emit('message', JSON.stringify({ event: 'foo' }));
 
         spy.callCount.should.eql(5);
-        spy.args[0][0].should.have.property('topic', MSG.updated.topic);
-        spy.args[1][0].should.have.property('topic', MSG.added.topic);
-        spy.args[2][0].should.have.property('version', MSG.updated.version);
-        spy.args[3][0].should.have.property('topic', MSG.removed.topic);
+        spy.args[0][0].should.have.property('topic', UPDATED.topic);
+        spy.args[1][0].should.have.property('topic', ADDED.topic);
+        spy.args[2][0].should.have.property('version', UPDATED.version);
+        spy.args[3][0].should.have.property('topic', REMOVED.topic);
         spy.args[4][0].should.be.empty;
       });
     });
@@ -155,51 +147,6 @@ describe('Zotero.Stream', function () {
 
   describe('given a simple multi-key stream', function () {
     var stream;
-
-    var MSG = {
-      subscribe: {
-        action: 'createSubscriptions',
-        subscriptions: [
-          {
-            apiKey: 'abcdefghijklmn1234567890',
-            topics: ['/users/123456', '/groups/456789']
-          },
-          {
-            apiKey: 'bcdefghijklmn12345678901'
-          },
-          {
-            topics: ['/groups/567890', '/groups/12345']
-          }
-        ]
-      },
-      subscribed: {
-        event: 'subscriptionsCreated',
-        subscriptions: [
-          {
-            apiKey: 'abcdefghijklmn1234567890',
-            topics: ['/users/123456']
-          },
-          {
-            apiKey: 'bcdefghijklmn2345678901',
-            topics: ['/users/345678']
-          },
-          {
-            topics: ['/groups/12345']
-          }
-        ],
-        errors: [
-          {
-            apiKey: 'abcdefghijklmn1234567890',
-            topic: '/groups/456789',
-            error: 'Topic is not valid for provided API key'
-          },
-          {
-            topic: '/groups/567890',
-            error: 'Topic is not accessible without an API key'
-          }
-        ]
-      }
-    };
 
     beforeEach(function () { stream = new Stream(); });
 
@@ -218,7 +165,8 @@ describe('Zotero.Stream', function () {
     });
 
     describe('.subscribe', function () {
-      var message = MSG.subscribed;
+      var outbound = F.createSubscriptions;
+      var inbound  = F.subscriptionsCreated;
 
       beforeEach(function () {
         stream.socket.readyState = WS.OPEN;
@@ -228,33 +176,33 @@ describe('Zotero.Stream', function () {
       afterEach(function () { stream.emit.restore(); });
 
       it('sends a create subscription message', function () {
-        stream.subscribe(MSG.subscribe.subscriptions);
+        stream.subscribe(outbound.subscriptions);
 
         stream.socket.send.called.should.be.true;
 
         stream.socket.send.args[0][0]
-          .should.have.property('action', MSG.subscribe.action);
+          .should.have.property('action', outbound.action);
 
         stream.socket.send.args[0][0]
           .should.have.property('subscriptions')
-          .and.have.length(MSG.subscribe.subscriptions.length);
+          .and.have.length(outbound.subscriptions.length);
       });
 
       describe('when successful', function () {
         beforeEach(function () {
-          stream.socket.emit('message', JSON.stringify(message));
+          stream.socket.emit('message', JSON.stringify(inbound));
         });
 
         it('updates the local subscriptions', function () {
           stream.subscriptions.topics
-            .should.containEql(message.subscriptions[0].topics[0]);
+            .should.containEql(inbound.subscriptions[0].topics[0]);
           stream.subscriptions.topics
-            .should.not.containEql(message.errors[0].topic);
+            .should.not.containEql(inbound.errors[0].topic);
         });
 
         it('emits the event', function () {
           stream.emit.called.should.be.true;
-          stream.emit.lastCall.args[0].should.eql(message.event);
+          stream.emit.lastCall.args[0].should.eql(inbound.event);
         });
       });
 
@@ -265,7 +213,7 @@ describe('Zotero.Stream', function () {
           cb = sinon.spy();
 
           stream.socket.readyState = WS.CONNECTING;
-          stream.subscribe(MSG.subscribe.subscriptions, cb);
+          stream.subscribe(outbound.subscriptions, cb);
         });
 
         it('does not send the subscription message', function () {
@@ -278,9 +226,9 @@ describe('Zotero.Stream', function () {
 
         it('adds the subscriptions locally', function () {
           stream.subscriptions.topics
-            .should.containEql(message.subscriptions[0].topics[0]);
+            .should.containEql(inbound.subscriptions[0].topics[0]);
           stream.subscriptions.topics
-            .should.containEql(message.errors[0].topic);
+            .should.containEql(inbound.errors[0].topic);
         });
 
         describe('once connected', function () {
@@ -299,14 +247,14 @@ describe('Zotero.Stream', function () {
 
           describe('on created/errors', function () {
             beforeEach(function () {
-              stream.socket.emit('message', JSON.stringify(message));
+              stream.socket.emit('message', JSON.stringify(inbound));
             });
 
             it('updates local subscriptions accordingly', function () {
               stream.subscriptions.topics
-                .should.containEql(message.subscriptions[0].topics[0]);
+                .should.containEql(inbound.subscriptions[0].topics[0]);
               stream.subscriptions.topics
-                .should.not.containEql(message.errors[0].topic);
+                .should.not.containEql(inbound.errors[0].topic);
             });
           });
         });
