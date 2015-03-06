@@ -16,20 +16,19 @@ var F = require('./fixtures.json').stream;
 
 describe('Zotero.Stream', function () {
 
+  // Stub the open method to create a simple
+  // EventEmitter instead of a WebSocket!
   before(function () {
-    // Stub the open method to create a simple
-    // EventEmitter instead of a WebSocket!
     sinon.stub(Stream.prototype, 'open', function () {
       this.socket = new EventEmitter();
       this.bind();
-
       this.socket.send = sinon.stub().yields();
-
       return this;
     });
   });
 
   after(function () { Stream.prototype.open.restore(); });
+
 
   it('is a constructor', function () { Stream.should.be.a.Function; });
 

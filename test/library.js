@@ -2,10 +2,13 @@
 
 var sinon = require('sinon');
 var EventEmitter = require('events').EventEmitter;
+var WS = require('ws');
 
 var Library = require('../lib/library');
 var Client  = require('../lib/client');
 var Stream  = require('../lib/stream');
+
+var F = require('./fixtures.json');
 
 describe('Zotero.Library', function () {
   var library;
@@ -317,26 +320,28 @@ describe('Zotero.Library', function () {
   describe('#stream', function () {
     var stream, callback;
 
+    // Stub the open method to create a simple
+    // EventEmitter instead of a WebSocket!
     before(function () {
-      // Stub the open method to create a simple
-      // EventEmitter instead of a WebSocket!
       sinon.stub(Stream.prototype, 'open', function () {
         this.socket = new EventEmitter();
         this.bind();
-
         this.socket.send = sinon.stub().yields();
-
         return this;
       });
     });
 
     after(function () { Stream.prototype.open.restore(); });
 
+
     beforeEach(function () {
       callback = sinon.spy();
 
       library.user = 12345;
+      library.key = 'foo';
+
       stream = library.stream(callback);
+      sinon.spy(stream, 'emit');
     });
 
     it('returns a stream', function () {
@@ -345,16 +350,35 @@ describe('Zotero.Library', function () {
 
     describe('when the event stream works', function () {
       beforeEach(function () {
-        stream.socket.emit('message', '{"event":"connected"}');
+        stream.socket.readyState = WS.OPEN;
+        stream.socket.emit('open');
+        stream.socket.emit('message', JSON.stringify(F.stream.connected));
       });
 
-      it('connects to the stream API');
+      it('connects to the stream API', function () {
+        stream.emit.calledWith('connected').should.be.true;
+      });
 
-      it('adds a subscription for the library');
+      it('adds a subscription for the library', function () {
+        stream.socket.send.called.should.be.true;
+        stream.socket.send.args[0][0]
+          .should.have.property('action', 'createSubscriptions');
 
-      it('uses the library API key if present');
+        stream.emit.calledWith('createSubscriptions').should.be.true;
+      });
 
-      it('fails if the subscription request fails');
+      it('uses the library API key if present', function () {
+        stream.socket.send.called.should.be.true;
+        stream.socket.send.args[0][0].should
+          .have.property('subscriptions')
+          .and.eql([{ topics: ['/users/12345'], apiKey: 'foo' }]);
+      });
+
+      it('returns the stream in the callback', function () {
+        callback.called.should.be.true;
+        (callback.args[0][0] === null).should.be.true;
+        callback.args[0][1].should.equal(stream);
+      });
     });
 
     describe('when the event stream does not work', function () {
