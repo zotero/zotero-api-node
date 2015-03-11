@@ -12,6 +12,12 @@ coverage
 doc
 docs
 
-# Locale dependencies
+# Local dependencies
 node_modules
 
+# Do not publish test and dev files
+test
+yuidoc.json
+makefile
+watch.js
+.eslintrc
