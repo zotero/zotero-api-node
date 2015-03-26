@@ -361,7 +361,8 @@ describe('Zotero.Library', function () {
 
       it('adds a subscription for the library', function () {
         stream.socket.send.called.should.be.true;
-        stream.socket.send.args[0][0]
+
+        JSON.parse(stream.socket.send.args[0][0])
           .should.have.property('action', 'createSubscriptions');
 
         stream.emit.calledWith('createSubscriptions').should.be.true;
@@ -369,8 +370,9 @@ describe('Zotero.Library', function () {
 
       it('uses the library API key if present', function () {
         stream.socket.send.called.should.be.true;
-        stream.socket.send.args[0][0].should
-          .have.property('subscriptions')
+
+        JSON.parse(stream.socket.send.args[0][0])
+          .should.have.property('subscriptions')
           .and.eql([{ topics: ['/users/12345'], apiKey: 'foo' }]);
       });
 

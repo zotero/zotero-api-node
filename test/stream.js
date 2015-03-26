@@ -106,10 +106,10 @@ describe('Zotero.Stream', function () {
             stream.subscriptions.empty.should.be.true;
             stream.socket.send.called.should.be.true;
 
-            stream.socket.send.args[0][0]
+            JSON.parse(stream.socket.send.args[0][0])
               .should.have.property('action', 'createSubscriptions');
 
-            stream.socket.send.args[0][0]
+            JSON.parse(stream.socket.send.args[0][0])
               .should.have.property('subscriptions')
               .and.eql(F.subscriptionsCreated.subscriptions);
 
@@ -272,10 +272,10 @@ describe('Zotero.Stream', function () {
 
         stream.socket.send.called.should.be.true;
 
-        stream.socket.send.args[0][0]
+        JSON.parse(stream.socket.send.args[0][0])
           .should.have.property('action', outbound.action);
 
-        stream.socket.send.args[0][0]
+        JSON.parse(stream.socket.send.args[0][0])
           .should.have.property('subscriptions')
           .and.have.length(outbound.subscriptions.length);
       });
@@ -375,9 +375,10 @@ describe('Zotero.Stream', function () {
       it('sends the unsubscription message', function () {
         stream.socket.send.calledOnce.should.be.true;
 
-        stream.socket.send.args[0][0].should.have.property('action', 'deleteSubscriptions');
+        JSON.parse(stream.socket.send.args[0][0])
+          .should.have.property('action', 'deleteSubscriptions');
 
-        stream.socket.send.args[0][0]
+        JSON.parse(stream.socket.send.args[0][0])
           .should.have.property('subscriptions')
           .and.have.length(1);
       });
