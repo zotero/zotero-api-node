@@ -34,7 +34,7 @@
     "yuidocjs": "~0.3.50"
   },
   "dependencies": {
-    "debug": "*",
+    "debug": "~2.1.1",
     "mime-types": "~1.0.0",
     "ws": "^0.7.1"
   }
