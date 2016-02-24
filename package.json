@@ -38,6 +38,7 @@
   },
   "dependencies": {
     "debug": "*",
+    "mime-db": "^1.22.0",
     "mime-types": "^2.1.10",
     "ws": "^1.0.1"
   }
