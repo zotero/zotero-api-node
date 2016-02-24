@@ -428,7 +428,7 @@ describe('Zotero.Stream.Subscriptions', function () {
 
       it('updates existing subscriptions', function () {
         s.update([{ topics: ['foo', 'bar'] }]);
-        s.update([{ topics: ['foo' ] }]);
+        s.update([{ topics: ['foo'] }]);
 
         s.all.should.have.length(1);
         s.topics.should.eql(['foo']);
@@ -452,7 +452,7 @@ describe('Zotero.Stream.Subscriptions', function () {
 
     describe('.cancel', function () {
       beforeEach(function () {
-        s.update([ { topics: ['foo'] }, { apiKey: 'x', topics: ['bar', 'baz'] } ]);
+        s.update([{ topics: ['foo'] }, { apiKey: 'x', topics: ['bar', 'baz'] }]);
       });
 
       it('cancels all subscriptions for a given key', function () {
@@ -488,7 +488,7 @@ describe('Zotero.Stream.Subscriptions', function () {
 
     describe('.add', function () {
       beforeEach(function () {
-        s.update([ { topics: ['foo'] }, { apiKey: 'x' } ]);
+        s.update([{ topics: ['foo'] }, { apiKey: 'x' }]);
       });
 
       it('adds a topic to an existing subscription', function () {
@@ -511,7 +511,7 @@ describe('Zotero.Stream.Subscriptions', function () {
 
     describe('.remove', function () {
       beforeEach(function () {
-        s.update([ { topics: ['foo'] }, { apiKey: 'x' } ]);
+        s.update([{ topics: ['foo'] }, { apiKey: 'x' }]);
       });
 
       it('removes a single topic from existing subscriptions', function () {

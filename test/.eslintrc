@@ -1,0 +1,7 @@
+# vi: set ft=yaml
+
+env:
+  mocha: true
+rules:
+  max-nested-callbacks: [2, 8]
+  max-len: 0

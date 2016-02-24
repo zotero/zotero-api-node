@@ -21,7 +21,7 @@ describe('When using Promises', function () {
         var path = '/users/475425/collections/9KH9TNSJ/items';
         var response = '<?xml version="1.0"';
 
-        beforeEach(function() {
+        beforeEach(function () {
           nock('https://api.zotero.org')
             .get(path)
             .reply(200, response);

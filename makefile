@@ -8,7 +8,7 @@ doc:
 	${BIN}/yuidoc .
 
 lint:
-	@${BIN}/eslint -c .eslintrc ${SRC} ${TEST}
+	@${BIN}/eslint ${SRC} ${TEST}
 
 test: lint
 	@${BIN}/mocha ${TEST}

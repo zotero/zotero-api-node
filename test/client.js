@@ -54,7 +54,7 @@ describe('Zotero.Client', function () {
       var path = '/users/475425/collections/9KH9TNSJ/items';
       var response = '<?xml version="1.0"';
 
-      beforeEach(function() {
+      beforeEach(function () {
         nock('https://api.zotero.org')
           .get(path)
           .reply(200, response);
@@ -235,10 +235,10 @@ describe('Zotero.Client', function () {
     describe('given a body object', function () {
       var path = '/users/475425/items';
 
-      beforeEach(function() {
+      beforeEach(function () {
         nock('https://api.zotero.org')
           .post(path, '{"title":"foo"}')
-          .reply(200, { success: { 0: 'abc123' }});
+          .reply(200, { success: { 0: 'abc123' } });
       });
 
       it('sends a JSON body', function (done) {
