@@ -325,6 +325,9 @@ describe('Zotero.Library', function () {
     before(function () {
       sinon.stub(Stream.prototype, 'open', function () {
         this.socket = new EventEmitter();
+        this.socket._socket = {
+          setKeepAlive: sinon.stub()
+        };
         this.bind();
         this.socket.send = sinon.stub().yields();
         return this;
