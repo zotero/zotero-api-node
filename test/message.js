@@ -70,6 +70,7 @@ describe('Zotero.Message', function () {
           .reply(200, 'ok');
 
         m.bind({
+          protocol: 'https:',
           host: 'api.zotero.org',
           path: '/users/42/items'
         });
@@ -112,6 +113,7 @@ describe('Zotero.Message', function () {
           .reply(200, 'ok');
 
         m.bind({
+          protocol: 'https:',
           host: 'api.zotero.org',
           path: '/users/42/items'
         });
