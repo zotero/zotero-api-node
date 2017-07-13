@@ -223,8 +223,8 @@ describe('Zotero.Client', function () {
 
         message.links.next.path.should.eql('/users/12345/items');
 
-        message.links.next.options.should.have.property('limit', '30');
-        message.links.next.options.should.have.property('start', '30');
+        message.links.next.options.limit.should.eql('30');
+        message.links.next.options.start.should.eql('30');
 
         done();
       });

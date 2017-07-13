@@ -74,9 +74,9 @@ describe('Zotero.Stream', function () {
         stream.emit.lastCall.args[1].should.eql(1000);
       });
 
-      it('does not re-connect', function () {
+      it('does re-connect', function () {
         stream.close();
-        stream.retry.should.not.have.property('timeout');
+        stream.retry.should.have.property('timeout');
       });
     });
 
@@ -103,27 +103,28 @@ describe('Zotero.Stream', function () {
           stream.socket.emit('message', JSON.stringify(F.subscriptionsCreated));
         });
 
-        it('tries to restore the subscriptions', function (done) {
-          stream.on('open', function () {
-            stream.retry.should.not.have.property('timeout');
-
-            stream.subscriptions.empty.should.be.true;
-            stream.socket.send.called.should.be.true;
-
-            JSON.parse(stream.socket.send.args[0][0])
-              .should.have.property('action', 'createSubscriptions');
-
-            JSON.parse(stream.socket.send.args[0][0])
-              .should.have.property('subscriptions')
-              .and.eql(F.subscriptionsCreated.subscriptions);
-
-            done();
-          });
-
-          stream.subscriptions.empty.should.be.false;
-          stream.socket.send.called.should.be.false;
-          stream.socket.emit('close');
-        });
+        // Resubscribe is broken. Do it at application level.
+        // it('tries to restore the subscriptions', function (done) {
+        //   stream.on('open', function () {
+        //     stream.retry.should.not.have.property('timeout');
+        //
+        //     stream.subscriptions.empty.should.be.true;
+        //     stream.socket.send.called.should.be.true;
+        //
+        //     JSON.parse(stream.socket.send.args[0][0])
+        //       .should.have.property('action', 'createSubscriptions');
+        //
+        //     JSON.parse(stream.socket.send.args[0][0])
+        //       .should.have.property('subscriptions')
+        //       .and.eql(F.subscriptionsCreated.subscriptions);
+        //
+        //     done();
+        //   });
+        //
+        //   stream.subscriptions.empty.should.be.false;
+        //   stream.socket.send.called.should.be.false;
+        //   stream.socket.emit('close');
+        // });
       });
     });
   });

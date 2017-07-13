@@ -330,6 +330,7 @@ describe('Zotero.Library', function () {
         };
         this.bind();
         this.socket.send = sinon.stub().yields();
+        this.socket.close = sinon.stub();
         return this;
       });
     });
