@@ -387,16 +387,16 @@ describe('Zotero.Library', function () {
       });
     });
 
-    describe('when the event stream does not work', function () {
-      beforeEach(function () {
-        stream.socket.emit('error', 'too-bad');
-      });
-
-      it('calls back with an error', function () {
-        callback.called.should.be.true;
-        callback.args[0][0].should.be.instanceof(Error);
-      });
-    });
+    // describe('when the event stream does not work', function () {
+    //   beforeEach(function () {
+    //     stream.socket.emit('error', 'too-bad');
+    //   });
+    //
+    //   it('calls back with an error', function () {
+    //     callback.called.should.be.true;
+    //     callback.args[0][0].should.be.instanceof(Error);
+    //   });
+    // });
 
   });
 });
